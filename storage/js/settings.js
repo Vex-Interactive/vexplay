@@ -31,7 +31,7 @@ function showCustomThemeSettings() {
 
 function populateCustomThemeSettings() {
     const customTheme = JSON.parse(localStorage.getItem('customTheme')) || {};
-    document.getElementById('background-image').value = customTheme['background-image'] || 'https://raw.githubusercontent.com/a456pur/seraph/main/images/backgrounds/seraph/homebg.png';
+    document.getElementById('background-image').value = customTheme['background-image'] || 'https://raw.githubusercontent.com/a456pur/VexPlay/main/images/backgrounds/VexPlay/homebg.png';
     document.getElementById('font-family').value = customTheme['font-family'] || 'Ubuntu';
     document.getElementById('text-color').value = customTheme['text-color'] || '#FFFFFF';
     document.getElementById('background-color').value = customTheme['background-color'] || 'black';
@@ -346,7 +346,7 @@ document.getElementById('export-theme').addEventListener('click', function() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `seraph-${themeName}.theme`;
+        a.download = `VexPlay-${themeName}.theme`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

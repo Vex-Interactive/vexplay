@@ -225,7 +225,7 @@ document.addEventListener("DOMContentLoaded", function () {
 const OFFLINE_MODE = [
     // offline mode page files
     '/offline.html',
-    '/images/backgrounds/seraph/offlinebg.jpg',
+    '/images/backgrounds/VexPlay/offlinebg.jpg',
     '/images/ico.ico',
     '/storage/fonts/ubuntu/Ubuntu.woff2',
     '/storage/js/directories.json',

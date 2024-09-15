@@ -9388,7 +9388,7 @@ var executive = (function(){
     // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
     // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
 
-    // requestAnimationFrame polyfill by Erik Möller
+    // requestAnimationFrame polyfill by Erik M??ller
     // fixes from Paul Irish and Tino Zijdel
 
     (function() {
@@ -10010,9 +10010,9 @@ var preNewGameState = (function() {
         function() { 
             exitTo(aboutGameState);
         });
-	menu.addTextButtonLink("SERAPH",
+	menu.addTextButtonLink("VexPlay",
         function() {
-            window.open("https://seraph.reveriestudios.online");
+            window.open("https://VexPlay.reveriestudios.online");
         });
     /*
 	dsg hide back button
@@ -10616,7 +10616,7 @@ var aboutState = (function(){
     var menu = new Menu("", 2*tileSize,mapHeight-11*tileSize,mapWidth-4*tileSize,3*tileSize,tileSize,tileSize+"px ArcadeR", "#EEE");
     menu.addTextButton("GO TO PROJECT PAGE",
         function() {
-            window.open("https://github.com/a456pur/seraph");
+            window.open("https://github.com/a456pur/VexPlay");
         });
     menu.addTextButton("BACK",
         function() {

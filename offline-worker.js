@@ -1,4 +1,4 @@
-const CACHE_NAME = 'seraph-cache';
+const CACHE_NAME = 'VexPlay-cache';
 const OFFLINE_URLS = [
     '/offline.html',
 ];
