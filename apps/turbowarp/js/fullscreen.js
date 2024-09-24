@@ -2817,7 +2817,7 @@ const ThemeHOC = function ThemeHOC(WrappedComponent) {
 
       if (dark && !darkModeStylesheet.parentNode) {
         // Append at the start of <body> we override scratch-gui styles in <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-7FN7LEVWXD"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=GTM-NX2QKP76"></script>
         <script>
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
