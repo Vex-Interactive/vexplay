@@ -1,0 +1,117 @@
+<html lang="en">
+    <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=GTM-NX2QKP76"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-7FN7LEVWXD');
+        </script>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="images/ico.ico" type="image/x-icon">
+        <title>TOS | Vexplay</title>
+        <link rel="stylesheet" href="storage/css/updatelog.css">
+
+        <meta name="description" content="an open source games site hosting 500+ games, useful utilities, powerful settings + a clean user interface">
+        <meta property="og:site_name" content="Vexplay">
+        <meta property="og:title" content="Vexplay">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="an open source games site hosting 500+ games, useful utilities, powerful settings + a clean user interface">
+
+        <script>
+          if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function() {
+              navigator.serviceWorker.register('/offline-worker.js').then(function(registration) {
+                  console.log('service worker initalised! scope:', registration.scope);
+      
+                  navigator.serviceWorker.addEventListener('message', function(event) {
+                      if (event.data === 'cached') {
+                          document.getElementById('cache-status').style.display = 'block';
+                      }
+                  });
+              }, function(error) {
+                  console.log('ack, error with serviceworker! ', error);
+              });
+          });
+      }
+      </script>
+  </head>
+  <body>
+  
+      <div id="content-side">
+        <br>
+        <br>
+        <h3 style="text-align: center;"><a href="index.html" style="color: var(--text-color); text-decoration: underline;">homepage</a> • <a href="https://github.com/vex-interractive/Vexplay" target="_blank" style="text-decoration: underline; color: var(--text-color)">github</a></h3>
+        
+
+      </select>
+
+      <div id="v10" class="version-content default">
+        <h2>Terms of Service</h2>
+        <ul>
+          <li>
+            <ul>
+                            <p>Vexplay Inc.™ Privacy Policy
+
+<p>Effective Date: 3/11/2024</p>
+
+<p>Thank you for visiting Vexplay! This Privacy Policy explains our approach to handling user information when you visit our website at vexplay.vercel.app. At Vexplay, we are committed to protecting your privacy and want to be transparent about our practices. Rest assured, we do not collect any personal information from our users.</p>
+
+<p>1. Information We Collect</p>
+
+<p>Basic Analytics Data: We use Cloudflare to collect non-personal information about user interactions on our website. This includes data on page clicks, popular pages, and general engagement trends. This information is collected solely to help us understand website performance and improve user experience. Cookies: We use cookies to save instances or progress of games you play.</p>
+<p>2. How We Use Your Information</p>
+
+<p>The non-personal analytics data collected through Cloudflare is used exclusively to analyze website performance and identify ways to enhance user experience.</p>
+
+<p>3. Data Security</p>
+
+<p>We prioritize the security of your browsing experience and ensure that our website is hosted on secure platforms. Cloudflare’s analytics tools are configured to respect user privacy and provide aggregate data without personally identifying users.</p>
+
+<p>4. Your Choices</p>
+
+<p>As we do not collect personal information, there are no choices required regarding the use of your personal information on our website.</p>
+
+<p>5. Children's Privacy
+</p>
+
+<p>Our website is designed to be safe for all audiences, and we do not intentionally collect any information from individuals under the age of 13.</p>
+
+<p>6. Changes to this Policy
+</p>
+<p>We may update this Privacy Policy in the future, but rest assured that our commitment to user privacy and transparency will remain unchanged.
+</p>
+<p>7. Contact Us
+</p>
+<p>If you have any questions or concerns regarding our privacy practices, please feel free to reach out to us on Discord at https://discord.com/invite/k9MH6Y875s.
+</p>
+
+<p>Last updated: 3/11/2024
+</p>
+            </ul>
+          </li>
+      </div>
+
+      <script>
+        document.getElementById('version-select').addEventListener('change', function() {
+            const selectedValue = this.value;
+            const versionContents = document.querySelectorAll('.version-content');
+
+            versionContents.forEach(function(content) {
+                if (content.id === selectedValue) {
+                    content.style.display = 'block';
+                } else {
+                    content.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+
+<script src="storage/js/cloak.js"></script>
+<script src="storage/js/theme.js"></script>
+  </body>
+</html>
