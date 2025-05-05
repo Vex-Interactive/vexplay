@@ -208,10 +208,18 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirebaseConfig } from "./storage/js/firebase-config.js";
+        import { runFirebaseDiagnostics } from "./storage/js/firebase-diagnostic.js";
         
-        // Get the encrypted Firebase configuration
-        const firebaseConfig = getFirebaseConfig();
+        // Direct Firebase configuration - no encryption
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+            authDomain: "vexplay-33e9f.firebaseapp.com",
+            projectId: "vexplay-33e9f",
+            storageBucket: "vexplay-33e9f.firebasestorage.app",
+            messagingSenderId: "797854431681",
+            appId: "1:797854431681:web:b09b88437937b9fc551740",
+            measurementId: "G-KRWYW4Z4Y3"
+        };
 
         // Initialize Firebase with retry mechanism
         let app, auth, provider;
@@ -237,6 +245,64 @@
             
             retryButton.addEventListener('click', () => {
                 window.location.reload();
+            });
+            
+            // Add diagnose button for further troubleshooting
+            const diagnoseButton = document.createElement('button');
+            diagnoseButton.textContent = "Run Diagnostics";
+            diagnoseButton.className = "auth-button";
+            diagnoseButton.style.marginTop = "10px";
+            diagnoseButton.style.marginBottom = "10px";
+            retryButton.parentNode.insertBefore(diagnoseButton, retryButton.nextSibling);
+            
+            diagnoseButton.addEventListener('click', async () => {
+                diagnoseButton.textContent = "Running Diagnostics...";
+                diagnoseButton.disabled = true;
+                
+                // Show diagnostic progress
+                const diagnosticResultsElem = document.createElement('div');
+                diagnosticResultsElem.id = 'diagnostic-results';
+                diagnosticResultsElem.style.marginTop = '15px';
+                diagnosticResultsElem.style.textAlign = 'left';
+                diagnosticResultsElem.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+                diagnosticResultsElem.style.padding = '10px';
+                diagnosticResultsElem.style.borderRadius = '5px';
+                diagnosticResultsElem.style.fontSize = '14px';
+                diagnosticResultsElem.style.whiteSpace = 'pre-line';
+                diagnosticResultsElem.textContent = "Running diagnostics, please wait...";
+                
+                retryButton.parentNode.insertBefore(diagnosticResultsElem, diagnoseButton.nextSibling);
+                
+                try {
+                    // Run diagnostics with the API key
+                    const results = await runFirebaseDiagnostics(firebaseConfig.apiKey);
+                    
+                    // Display diagnostic results
+                    diagnosticResultsElem.innerHTML = `
+                        <strong>Diagnostic Results:</strong>
+                        <br>
+                        Browser Compatible: ${results.browserCompatible ? '✅' : '❌'}
+                        <br>
+                        Network Connection: ${results.googleConnectivity ? '✅' : '❌'}
+                        <br>
+                        Firebase SDK: ${results.firebaseSDKLoaded ? '✅' : '❌'}
+                        <br>
+                        Content Blockers: ${results.noContentBlockers ? '✅ None detected' : '❌ Detected'}
+                        <br>
+                        API Key Valid: ${results.apiKeyValid ? '✅' : '❌'}
+                        <br>
+                        Storage Permissions: ${results.storagePermissionsGranted ? '✅' : '❌'}
+                        <br><br>
+                        <strong>Recommendations:</strong>
+                        <br>
+                        ${results.recommendations}
+                    `;
+                } catch (error) {
+                    diagnosticResultsElem.textContent = `Error running diagnostics: ${error.message}`;
+                } finally {
+                    diagnoseButton.textContent = "Run Diagnostics";
+                    diagnoseButton.disabled = false;
+                }
             });
         }
 
