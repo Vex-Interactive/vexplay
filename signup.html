@@ -187,7 +187,7 @@
               </div>
               
               <button class="auth-button google-button" id="googleSignupButton">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo">
                   Sign up with Google
               </button>
               
@@ -208,24 +208,51 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirebaseConfig } from "./storage/js/firebase-config.js";
         
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
-          authDomain: "vexplay-33e9f.firebaseapp.com",
-          projectId: "vexplay-33e9f",
-          storageBucket: "vexplay-33e9f.firebaseStorage.app",
-          messagingSenderId: "797854431681",
-          appId: "1:797854431681:web:b09b88437937b9fc551740",
-          measurementId: "G-KRWYW4Z4Y3"
-        };
+        // Get the encrypted Firebase configuration
+        const firebaseConfig = getFirebaseConfig();
+
+        // Initialize Firebase with retry mechanism
+        let app, auth, provider;
         
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-        
+        try {
+            app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+            auth = getAuth(app);
+            provider = new GoogleAuthProvider();
+        } catch (error) {
+            // Handle Firebase initialization error
+            console.error("Firebase initialization error:", error);
+            const errorElement = document.getElementById('signupError');
+            errorElement.textContent = "Connection to authentication service failed. Please try again later.";
+            errorElement.style.display = "block";
+            
+            // Add retry button in case of Firebase initialization error
+            const retryButton = document.createElement('button');
+            retryButton.textContent = "Retry Connection";
+            retryButton.className = "auth-button";
+            retryButton.style.marginTop = "15px";
+            errorElement.parentNode.insertBefore(retryButton, errorElement.nextSibling);
+            
+            retryButton.addEventListener('click', () => {
+                window.location.reload();
+            });
+        }
+
+        // Network status listener
+        window.addEventListener('online', () => {
+            const errorElement = document.getElementById('signupError');
+            if (errorElement.textContent.includes('connection') || errorElement.textContent.includes('network')) {
+                errorElement.textContent = "Connection restored. You can try signing up now.";
+                errorElement.style.color = "#4BB543";
+                errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
+                setTimeout(() => {
+                    errorElement.style.display = "none";
+                }, 3000);
+            }
+        });
+
         // Email signup
         document.getElementById('signupButton').addEventListener('click', () => {
             const email = document.getElementById('email').value;
@@ -251,6 +278,19 @@
                 return;
             }
             
+            // Check for internet connection
+            if (!navigator.onLine) {
+                errorElement.textContent = "No internet connection. Please check your network and try again.";
+                errorElement.style.display = "block";
+                return;
+            }
+            
+            // Show loading message
+            errorElement.textContent = "Creating account...";
+            errorElement.style.color = "#ffffff";
+            errorElement.style.backgroundColor = "rgba(0, 150, 255, 0.1)";
+            errorElement.style.display = "block";
+            
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     // Signup successful
@@ -262,6 +302,10 @@
                     window.location.href = 'index.html';
                 })
                 .catch((error) => {
+                    // Reset error styling
+                    errorElement.style.color = "#ff6b6b";
+                    errorElement.style.backgroundColor = "rgba(255, 107, 107, 0.1)";
+                    
                     // Handle errors
                     const errorCode = error.code;
                     const errorMessage = error.message;
@@ -273,6 +317,8 @@
                         errorElement.textContent = "Invalid email address";
                     } else if (errorCode === 'auth/weak-password') {
                         errorElement.textContent = "Password is too weak";
+                    } else if (errorCode === 'auth/network-request-failed') {
+                        errorElement.textContent = "Network connection error. Please check your internet connection and try again.";
                     } else {
                         errorElement.textContent = "Signup failed: " + errorMessage;
                     }
@@ -283,6 +329,21 @@
         
         // Google signup
         document.getElementById('googleSignupButton').addEventListener('click', () => {
+            const errorElement = document.getElementById('signupError');
+            
+            // Check for internet connection
+            if (!navigator.onLine) {
+                errorElement.textContent = "No internet connection. Please check your network and try again.";
+                errorElement.style.display = "block";
+                return;
+            }
+            
+            // Show loading message
+            errorElement.textContent = "Connecting to Google...";
+            errorElement.style.color = "#ffffff";
+            errorElement.style.backgroundColor = "rgba(0, 150, 255, 0.1)";
+            errorElement.style.display = "block";
+            
             signInWithPopup(auth, provider)
                 .then((result) => {
                     // Google signup successful
@@ -294,13 +355,21 @@
                     window.location.href = 'index.html';
                 })
                 .catch((error) => {
+                    // Reset error styling
+                    errorElement.style.color = "#ff6b6b";
+                    errorElement.style.backgroundColor = "rgba(255, 107, 107, 0.1)";
+                    
                     // Handle errors
                     const errorCode = error.code;
                     const errorMessage = error.message;
                     console.error(errorCode, errorMessage);
                     
-                    const errorElement = document.getElementById('signupError');
-                    errorElement.textContent = "Google signup failed: " + errorMessage;
+                    if (errorCode === 'auth/network-request-failed') {
+                        errorElement.textContent = "Network connection error. Please check your internet connection and try again.";
+                    } else {
+                        errorElement.textContent = "Google signup failed: " + errorMessage;
+                    }
+                    
                     errorElement.style.display = "block";
                 });
         });

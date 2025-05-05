@@ -165,6 +165,19 @@
           <div class="auth-container">
               <div id="loginError" class="auth-error"></div>
               
+              <!-- Add troubleshoot button and fallback auth container that appear when network error is shown -->
+              <div id="troubleshoot-container" style="display: none; margin-top: 15px;">
+                  <button id="immediate-troubleshoot-button" class="auth-button">Troubleshoot Connection</button>
+                  
+                  <div id="fallback-auth-container" style="margin-top: 20px; padding: 15px; border: 2px dashed var(--border-color2); border-radius: 8px; background-color: rgba(0, 0, 0, 0.2);">
+                      <h3 style="margin-top: 0; text-align: center;">Alternative Login Options</h3>
+                      <p style="text-align: center; margin-bottom: 15px;">Firebase authentication is currently having issues. You can:</p>
+                      <button id="immediate-anonymous-login" class="auth-button" style="margin-bottom: 10px;">Continue Anonymously</button>
+                      <button id="immediate-offline-login" class="auth-button" style="margin-bottom: 10px;">Try Offline Login</button>
+                      <button id="immediate-guest-mode" class="auth-button">Continue as Guest</button>
+                  </div>
+              </div>
+              
               <div class="form-group">
                   <label for="email">Email</label>
                   <input type="email" id="email" placeholder="Enter your email">
@@ -182,8 +195,12 @@
               </div>
               
               <button class="auth-button google-button" id="googleLoginButton">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo">
                   Continue with Google
+              </button>
+              
+              <button class="auth-button" id="anonymousLoginButton" style="margin-top: 10px;">
+                  Continue Anonymously
               </button>
               
               <div class="auth-footer">
@@ -202,27 +219,121 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-        import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { runFirebaseDiagnostics } from "./storage/js/firebase-diagnostic.js";
+        import { emergencyLogin, createGuestSession } from "./storage/js/offline-auth-fallback.js";
         
-        // Your web app's Firebase configuration
+        // Direct Firebase configuration - no encryption
         const firebaseConfig = {
-          apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
-          authDomain: "vexplay-33e9f.firebaseapp.com",
-          projectId: "vexplay-33e9f",
-          storageBucket: "vexplay-33e9f.firebaseStorage.app",
-          messagingSenderId: "797854431681",
-          appId: "1:797854431681:web:b09b88437937b9fc551740",
-          measurementId: "G-KRWYW4Z4Y3"
+            apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+            authDomain: "vexplay-33e9f.firebaseapp.com",
+            projectId: "vexplay-33e9f",
+            storageBucket: "vexplay-33e9f.firebasestorage.app",
+            messagingSenderId: "797854431681",
+            appId: "1:797854431681:web:b09b88437937b9fc551740",
+            measurementId: "G-KRWYW4Z4Y3"
         };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+        // Initialize Firebase with retry mechanism
+        let app, auth, provider;
+        
+        try {
+            app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+            auth = getAuth(app);
+            provider = new GoogleAuthProvider();
+        } catch (error) {
+            // Handle Firebase initialization error
+            console.error("Firebase initialization error:", error);
+            const errorElement = document.getElementById('loginError');
+            errorElement.textContent = "Connection to authentication service failed. Please try again later.";
+            errorElement.style.display = "block";
+            
+            // Add retry button in case of Firebase initialization error
+            const retryButton = document.createElement('button');
+            retryButton.textContent = "Retry Connection";
+            retryButton.className = "auth-button";
+            retryButton.style.marginTop = "15px";
+            errorElement.parentNode.insertBefore(retryButton, errorElement.nextSibling);
+            
+            retryButton.addEventListener('click', () => {
+                window.location.reload();
+            });
+            
+            // Add diagnose button for further troubleshooting
+            const diagnoseButton = document.createElement('button');
+            diagnoseButton.textContent = "Run Diagnostics";
+            diagnoseButton.className = "auth-button";
+            diagnoseButton.style.marginTop = "10px";
+            diagnoseButton.style.marginBottom = "10px";
+            retryButton.parentNode.insertBefore(diagnoseButton, retryButton.nextSibling);
+            
+            diagnoseButton.addEventListener('click', async () => {
+                diagnoseButton.textContent = "Running Diagnostics...";
+                diagnoseButton.disabled = true;
+                
+                // Show diagnostic progress
+                const diagnosticResultsElem = document.createElement('div');
+                diagnosticResultsElem.id = 'diagnostic-results';
+                diagnosticResultsElem.style.marginTop = '15px';
+                diagnosticResultsElem.style.textAlign = 'left';
+                diagnosticResultsElem.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+                diagnosticResultsElem.style.padding = '10px';
+                diagnosticResultsElem.style.borderRadius = '5px';
+                diagnosticResultsElem.style.fontSize = '14px';
+                diagnosticResultsElem.style.whiteSpace = 'pre-line';
+                diagnosticResultsElem.textContent = "Running diagnostics, please wait...";
+                
+                retryButton.parentNode.insertBefore(diagnosticResultsElem, diagnoseButton.nextSibling);
+                
+                try {
+                    // Run diagnostics with the API key
+                    const results = await runFirebaseDiagnostics(firebaseConfig.apiKey);
+                    
+                    // Display diagnostic results
+                    diagnosticResultsElem.innerHTML = `
+                        <strong>Diagnostic Results:</strong>
+                        <br>
+                        Browser Compatible: ${results.browserCompatible ? '✅' : '❌'}
+                        <br>
+                        Network Connection: ${results.googleConnectivity ? '✅' : '❌'}
+                        <br>
+                        Firebase SDK: ${results.firebaseSDKLoaded ? '✅' : '❌'}
+                        <br>
+                        Content Blockers: ${results.noContentBlockers ? '✅ None detected' : '❌ Detected'}
+                        <br>
+                        API Key Valid: ${results.apiKeyValid ? '✅' : '❌'}
+                        <br>
+                        Storage Permissions: ${results.storagePermissionsGranted ? '✅' : '❌'}
+                        <br><br>
+                        <strong>Recommendations:</strong>
+                        <br>
+                        ${results.recommendations}
+                    `;
+                } catch (error) {
+                    diagnosticResultsElem.textContent = `Error running diagnostics: ${error.message}`;
+                } finally {
+                    diagnoseButton.textContent = "Run Diagnostics";
+                    diagnoseButton.disabled = false;
+                }
+            });
+        }
 
-        // Email and password login
-        document.getElementById('loginButton').addEventListener('click', () => {
+        // Network status listener
+        window.addEventListener('online', () => {
+            const errorElement = document.getElementById('loginError');
+            if (errorElement.textContent.includes('connection') || errorElement.textContent.includes('network')) {
+                errorElement.textContent = "Connection restored. You can try logging in now.";
+                errorElement.style.color = "#4BB543";
+                errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
+                setTimeout(() => {
+                    errorElement.style.display = "none";
+                }, 3000);
+            }
+        });
+
+        // Add a manual diagnostic check button for login errors
+        document.getElementById('loginButton').addEventListener('click', async () => {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const errorElement = document.getElementById('loginError');
@@ -232,6 +343,81 @@
                 errorElement.style.display = "block";
                 return;
             }
+            
+            // Check for internet connection
+            if (!navigator.onLine) {
+                errorElement.textContent = "No internet connection. Please check your network and try again.";
+                errorElement.style.display = "block";
+                
+                // Add a troubleshoot button only if it doesn't exist yet
+                if (!document.getElementById('troubleshoot-button')) {
+                    const troubleshootButton = document.createElement('button');
+                    troubleshootButton.id = 'troubleshoot-button';
+                    troubleshootButton.textContent = "Troubleshoot Connection";
+                    troubleshootButton.className = "auth-button";
+                    troubleshootButton.style.marginTop = "15px";
+                    errorElement.parentNode.insertBefore(troubleshootButton, errorElement.nextSibling);
+                    
+                    troubleshootButton.addEventListener('click', async () => {
+                        troubleshootButton.textContent = "Running Diagnostics...";
+                        troubleshootButton.disabled = true;
+                        
+                        try {
+                            // Run diagnostics
+                            const results = await runFirebaseDiagnostics(firebaseConfig.apiKey);
+                            
+                            // Create or update diagnostic results element
+                            let diagnosticResultsElem = document.getElementById('diagnostic-results');
+                            if (!diagnosticResultsElem) {
+                                diagnosticResultsElem = document.createElement('div');
+                                diagnosticResultsElem.id = 'diagnostic-results';
+                                diagnosticResultsElem.style.marginTop = '15px';
+                                diagnosticResultsElem.style.textAlign = 'left';
+                                diagnosticResultsElem.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+                                diagnosticResultsElem.style.padding = '10px';
+                                diagnosticResultsElem.style.borderRadius = '5px';
+                                diagnosticResultsElem.style.fontSize = '14px';
+                                diagnosticResultsElem.style.whiteSpace = 'pre-line';
+                                troubleshootButton.parentNode.insertBefore(diagnosticResultsElem, troubleshootButton.nextSibling);
+                            }
+                            
+                            // Display diagnostic results
+                            diagnosticResultsElem.innerHTML = `
+                                <strong>Diagnostic Results:</strong>
+                                <br>
+                                Browser Compatible: ${results.browserCompatible ? '✅' : '❌'}
+                                <br>
+                                Network Connection: ${results.googleConnectivity ? '✅' : '❌'}
+                                <br>
+                                Firebase SDK: ${results.firebaseSDKLoaded ? '✅' : '❌'}
+                                <br>
+                                Content Blockers: ${results.noContentBlockers ? '✅ None detected' : '❌ Detected'}
+                                <br>
+                                API Key Valid: ${results.apiKeyValid ? '✅' : '❌'}
+                                <br>
+                                Storage Permissions: ${results.storagePermissionsGranted ? '✅' : '❌'}
+                                <br><br>
+                                <strong>Recommendations:</strong>
+                                <br>
+                                ${results.recommendations}
+                            `;
+                        } catch (error) {
+                            errorElement.textContent = `Error running diagnostics: ${error.message}`;
+                        } finally {
+                            troubleshootButton.textContent = "Troubleshoot Connection";
+                            troubleshootButton.disabled = false;
+                        }
+                    });
+                }
+                
+                return;
+            }
+            
+            // Show loading message
+            errorElement.textContent = "Logging in...";
+            errorElement.style.color = "#ffffff";
+            errorElement.style.backgroundColor = "rgba(0, 150, 255, 0.1)";
+            errorElement.style.display = "block";
             
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
@@ -244,6 +430,10 @@
                     window.location.href = 'index.html';
                 })
                 .catch((error) => {
+                    // Reset error styling
+                    errorElement.style.color = "#ff6b6b";
+                    errorElement.style.backgroundColor = "rgba(255, 107, 107, 0.1)";
+                    
                     // Handle errors
                     const errorCode = error.code;
                     const errorMessage = error.message;
@@ -255,6 +445,45 @@
                         errorElement.textContent = "No account found with this email";
                     } else if (errorCode === 'auth/wrong-password') {
                         errorElement.textContent = "Incorrect password";
+                    } else if (errorCode === 'auth/network-request-failed') {
+                        errorElement.textContent = "Network connection error. Please check your internet connection and try again.";
+                        
+                        // Show troubleshoot container for network errors
+                        document.getElementById('troubleshoot-container').style.display = "block";
+                        
+                        // Try to use anonymous auth as a fallback for network errors
+                        setTimeout(() => {
+                            try {
+                                signInAnonymously(auth)
+                                    .then((userCredential) => {
+                                        console.log("Anonymous fallback login successful");
+                                        // Only store minimal info for anonymous users
+                                        localStorage.setItem('userLoggedIn', 'true');
+                                        localStorage.setItem('isGuest', 'true');
+                                        localStorage.setItem('userId', userCredential.user.uid);
+                                        
+                                        errorElement.style.color = "#4BB543";
+                                        errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
+                                        errorElement.textContent = "Fallback to anonymous login successful. Redirecting...";
+                                        
+                                        setTimeout(() => {
+                                            window.location.href = 'index.html';
+                                        }, 1500);
+                                    })
+                                    .catch((anonError) => {
+                                        console.error("Anonymous login also failed:", anonError);
+                                    });
+                            } catch (e) {
+                                console.error("Error with anonymous auth:", e);
+                            }
+                        }, 2000); // Wait 2 seconds before trying anonymous auth
+                        
+                    } else if (errorCode === 'auth/invalid-api-key') {
+                        errorElement.textContent = "Firebase authentication error: API key is invalid. Please contact support.";
+                        
+                        // Show troubleshoot container for API key issues
+                        document.getElementById('troubleshoot-container').style.display = "block";
+                        
                     } else {
                         errorElement.textContent = "Login failed: " + errorMessage;
                     }
@@ -265,6 +494,21 @@
 
         // Google login
         document.getElementById('googleLoginButton').addEventListener('click', () => {
+            const errorElement = document.getElementById('loginError');
+            
+            // Check for internet connection
+            if (!navigator.onLine) {
+                errorElement.textContent = "No internet connection. Please check your network and try again.";
+                errorElement.style.display = "block";
+                return;
+            }
+            
+            // Show loading message
+            errorElement.textContent = "Connecting to Google...";
+            errorElement.style.color = "#ffffff";
+            errorElement.style.backgroundColor = "rgba(0, 150, 255, 0.1)";
+            errorElement.style.display = "block";
+            
             signInWithPopup(auth, provider)
                 .then((result) => {
                     // Google login successful
@@ -276,13 +520,60 @@
                     window.location.href = 'index.html';
                 })
                 .catch((error) => {
+                    // Reset error styling
+                    errorElement.style.color = "#ff6b6b";
+                    errorElement.style.backgroundColor = "rgba(255, 107, 107, 0.1)";
+                    
                     // Handle errors
                     const errorCode = error.code;
                     const errorMessage = error.message;
                     console.error(errorCode, errorMessage);
                     
-                    const errorElement = document.getElementById('loginError');
-                    errorElement.textContent = "Google login failed: " + errorMessage;
+                    if (errorCode === 'auth/network-request-failed') {
+                        errorElement.textContent = "Network connection error. Please check your internet connection and try again.";
+                        
+                        // Show troubleshoot container for network errors
+                        document.getElementById('troubleshoot-container').style.display = "block";
+                        
+                        // Try to use anonymous auth as a fallback for network errors
+                        setTimeout(() => {
+                            try {
+                                signInAnonymously(auth)
+                                    .then((userCredential) => {
+                                        console.log("Anonymous fallback login successful");
+                                        // Only store minimal info for anonymous users
+                                        localStorage.setItem('userLoggedIn', 'true');
+                                        localStorage.setItem('isGuest', 'true');
+                                        localStorage.setItem('userId', userCredential.user.uid);
+                                        
+                                        errorElement.style.color = "#4BB543";
+                                        errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
+                                        errorElement.textContent = "Fallback to anonymous login successful. Redirecting...";
+                                        
+                                        setTimeout(() => {
+                                            window.location.href = 'index.html';
+                                        }, 1500);
+                                    })
+                                    .catch((anonError) => {
+                                        console.error("Anonymous login also failed:", anonError);
+                                    });
+                            } catch (e) {
+                                console.error("Error with anonymous auth:", e);
+                            }
+                        }, 2000); // Wait 2 seconds before trying anonymous auth
+                        
+                    } else if (errorCode === 'auth/invalid-api-key') {
+                        errorElement.textContent = "Firebase authentication error: API key is invalid. Please contact support.";
+                        
+                        // Show troubleshoot container for API key issues
+                        document.getElementById('troubleshoot-container').style.display = "block";
+                        
+                    } else if (errorCode === 'auth/popup-closed-by-user') {
+                        errorElement.textContent = "Google login was cancelled. Please try again.";
+                    } else {
+                        errorElement.textContent = "Google login failed: " + errorMessage;
+                    }
+                    
                     errorElement.style.display = "block";
                 });
         });
@@ -298,6 +589,314 @@
             localStorage.setItem('userId', 'guest-' + Math.random().toString(36).substring(2, 15));
             window.location.href = 'index.html';
         });
+        
+        // Anonymous login - uses Firebase anonymous auth
+        document.getElementById('anonymousLoginButton').addEventListener('click', () => {
+            const errorElement = document.getElementById('loginError');
+            
+            // Show loading message
+            errorElement.textContent = "Connecting anonymously...";
+            errorElement.style.color = "#ffffff";
+            errorElement.style.backgroundColor = "rgba(0, 150, 255, 0.1)";
+            errorElement.style.display = "block";
+            
+            signInAnonymously(auth)
+                .then((userCredential) => {
+                    // Anonymous login successful
+                    const user = userCredential.user;
+                    localStorage.setItem('userLoggedIn', 'true');
+                    localStorage.setItem('isGuest', 'true');
+                    localStorage.setItem('userId', user.uid);
+                    localStorage.setItem('userEmail', 'anonymous');
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    // Reset error styling
+                    errorElement.style.color = "#ff6b6b";
+                    errorElement.style.backgroundColor = "rgba(255, 107, 107, 0.1)";
+                    
+                    // Handle errors
+                    console.error("Anonymous login error:", error);
+                    errorElement.textContent = "Anonymous login failed: " + error.message;
+                    
+                    // Fall back to guest mode
+                    setTimeout(() => {
+                        errorElement.textContent = "Falling back to guest mode...";
+                        setTimeout(() => {
+                            // Set guest status in localStorage without using Firebase
+                            createGuestSession();
+                            errorElement.style.color = "#4BB543";
+                            errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
+                            errorElement.textContent = "Guest mode activated. Redirecting...";
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 1500);
+                        }, 1000);
+                    }, 1500);
+                });
+        });
+
+        // Setup immediate offline login button
+        document.getElementById('immediate-offline-login').addEventListener('click', async () => {
+            try {
+                // Import the offline auth module dynamically
+                const { emergencyLogin } = await import('./storage/js/offline-auth-fallback.js');
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const errorElement = document.getElementById('loginError');
+                
+                if (!email || !password) {
+                    errorElement.textContent = "Please enter both email and password for offline login";
+                    errorElement.style.display = "block";
+                    return;
+                }
+                
+                // Try emergency login
+                const result = emergencyLogin(email, password);
+                
+                if (result.success) {
+                    errorElement.style.color = "#4BB543";
+                    errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
+                    errorElement.textContent = "Offline login successful. Redirecting...";
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } else {
+                    errorElement.textContent = "Offline login failed. Try guest mode or wait for Firebase to be available.";
+                }
+            } catch (error) {
+                console.error('Error with offline login:', error);
+                const errorElement = document.getElementById('loginError');
+                errorElement.textContent = `Error with offline login: ${error.message}`;
+            }
+        });
+        
+        // Setup immediate guest mode button
+        document.getElementById('immediate-guest-mode').addEventListener('click', async () => {
+            try {
+                // Import the offline auth module dynamically
+                const { createGuestSession } = await import('./storage/js/offline-auth-fallback.js');
+                
+                createGuestSession();
+                const errorElement = document.getElementById('loginError');
+                errorElement.style.color = "#4BB543";
+                errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
+                errorElement.textContent = "Guest mode activated. Redirecting...";
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            } catch (error) {
+                console.error('Error with guest mode:', error);
+                const errorElement = document.getElementById('loginError');
+                errorElement.textContent = `Error with guest mode: ${error.message}`;
+            }
+        });
+      </script>
+
+      <script>
+        // Show troubleshoot options if there's a network error displayed
+        function checkForNetworkError() {
+            const errorElement = document.getElementById('loginError');
+            const troubleshootContainer = document.getElementById('troubleshoot-container');
+            
+            // If error is visible and contains network connection text
+            if (errorElement && 
+                errorElement.style.display === "block" && 
+                errorElement.textContent.includes('Network connection error')) {
+                troubleshootContainer.style.display = "block";
+            } else {
+                troubleshootContainer.style.display = "none";
+            }
+        }
+        
+        // Check on page load and periodically
+        window.addEventListener('DOMContentLoaded', () => {
+            checkForNetworkError();
+            
+            // Setup immediate troubleshoot button
+            document.getElementById('immediate-troubleshoot-button').addEventListener('click', async () => {
+                const button = document.getElementById('immediate-troubleshoot-button');
+                button.textContent = "Running Diagnostics...";
+                button.disabled = true;
+                
+                try {
+                    // Import the diagnostic module dynamically
+                    const { runFirebaseDiagnostics } = await import('./storage/js/firebase-diagnostic.js');
+                    
+                    // Use the direct API key
+                    const apiKey = "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8";
+                    
+                    // Run diagnostics
+                    const results = await runFirebaseDiagnostics(apiKey);
+                    
+                    // Create or update diagnostic results element
+                    let diagnosticResultsElem = document.getElementById('diagnostic-results');
+                    if (!diagnosticResultsElem) {
+                        diagnosticResultsElem = document.createElement('div');
+                        diagnosticResultsElem.id = 'diagnostic-results';
+                        diagnosticResultsElem.style.marginTop = '15px';
+                        diagnosticResultsElem.style.textAlign = 'left';
+                        diagnosticResultsElem.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+                        diagnosticResultsElem.style.padding = '10px';
+                        diagnosticResultsElem.style.borderRadius = '5px';
+                        diagnosticResultsElem.style.fontSize = '14px';
+                        diagnosticResultsElem.style.whiteSpace = 'pre-line';
+                        button.parentNode.insertBefore(diagnosticResultsElem, button.nextSibling);
+                    }
+                    
+                    // Display diagnostic results
+                    diagnosticResultsElem.innerHTML = `
+                        <strong>Diagnostic Results:</strong>
+                        <br>
+                        Browser Compatible: ${results.browserCompatible ? '✅' : '❌'}
+                        <br>
+                        Network Connection: ${results.googleConnectivity ? '✅' : '❌'}
+                        <br>
+                        Firebase SDK: ${results.firebaseSDKLoaded ? '✅' : '❌'}
+                        <br>
+                        Content Blockers: ${results.noContentBlockers ? '✅ None detected' : '❌ Detected'}
+                        <br>
+                        API Key Valid: ${results.apiKeyValid ? '✅' : '❌'}
+                        <br>
+                        Storage Permissions: ${results.storagePermissionsGranted ? '✅' : '❌'}
+                        <br><br>
+                        <strong>Recommendations:</strong>
+                        <br>
+                        ${results.recommendations}
+                    `;
+                } catch (error) {
+                    console.error('Error running diagnostics:', error);
+                    const errorElement = document.getElementById('loginError');
+                    errorElement.textContent = `Error running diagnostics: ${error.message}`;
+                } finally {
+                    button.textContent = "Troubleshoot Connection";
+                    button.disabled = false;
+                }
+            });
+            
+            // Setup immediate anonymous login button
+            document.getElementById('immediate-anonymous-login').addEventListener('click', () => {
+                const errorElement = document.getElementById('loginError');
+                
+                // Show loading message
+                errorElement.textContent = "Connecting anonymously...";
+                errorElement.style.color = "#ffffff";
+                errorElement.style.backgroundColor = "rgba(0, 150, 255, 0.1)";
+                errorElement.style.display = "block";
+                
+                signInAnonymously(auth)
+                    .then((userCredential) => {
+                        // Anonymous login successful
+                        const user = userCredential.user;
+                        localStorage.setItem('userLoggedIn', 'true');
+                        localStorage.setItem('isGuest', 'true');
+                        localStorage.setItem('userId', user.uid);
+                        localStorage.setItem('userEmail', 'anonymous');
+                        
+                        errorElement.style.color = "#4BB543";
+                        errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
+                        errorElement.textContent = "Anonymous login successful. Redirecting...";
+                        
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1500);
+                    })
+                    .catch((error) => {
+                        console.error("Anonymous login error:", error);
+                        errorElement.textContent = "Anonymous login failed: " + error.message;
+                        
+                        // Fall back to guest mode
+                        setTimeout(() => {
+                            errorElement.textContent = "Falling back to guest mode...";
+                            setTimeout(() => {
+                                // Set guest status in localStorage without using Firebase
+                                createGuestSession();
+                                errorElement.style.color = "#4BB543";
+                                errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
+                                errorElement.textContent = "Guest mode activated. Redirecting...";
+                                setTimeout(() => {
+                                    window.location.href = 'index.html';
+                                }, 1500);
+                            }, 1000);
+                        }, 1500);
+                    });
+            });
+            
+            // Setup immediate offline login button
+            document.getElementById('immediate-offline-login').addEventListener('click', async () => {
+                try {
+                    // Import the offline auth module dynamically
+                    const { emergencyLogin } = await import('./storage/js/offline-auth-fallback.js');
+                    
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    const errorElement = document.getElementById('loginError');
+                    
+                    if (!email || !password) {
+                        errorElement.textContent = "Please enter both email and password for offline login";
+                        errorElement.style.display = "block";
+                        return;
+                    }
+                    
+                    // Try emergency login
+                    const result = emergencyLogin(email, password);
+                    
+                    if (result.success) {
+                        errorElement.style.color = "#4BB543";
+                        errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
+                        errorElement.textContent = "Offline login successful. Redirecting...";
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1500);
+                    } else {
+                        errorElement.textContent = "Offline login failed. Try guest mode or wait for Firebase to be available.";
+                    }
+                } catch (error) {
+                    console.error('Error with offline login:', error);
+                    const errorElement = document.getElementById('loginError');
+                    errorElement.textContent = `Error with offline login: ${error.message}`;
+                }
+            });
+            
+            // Setup immediate guest mode button
+            document.getElementById('immediate-guest-mode').addEventListener('click', async () => {
+                try {
+                    // Import the offline auth module dynamically
+                    const { createGuestSession } = await import('./storage/js/offline-auth-fallback.js');
+                    
+                    createGuestSession();
+                    const errorElement = document.getElementById('loginError');
+                    errorElement.style.color = "#4BB543";
+                    errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
+                    errorElement.textContent = "Guest mode activated. Redirecting...";
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } catch (error) {
+                    console.error('Error with guest mode:', error);
+                    const errorElement = document.getElementById('loginError');
+                    errorElement.textContent = `Error with guest mode: ${error.message}`;
+                }
+            });
+            
+            // Check for network errors occasionally
+            setInterval(checkForNetworkError, 1000);
+        });
+        
+        // Listen for error messages being displayed
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.id === 'loginError' && 
+                    (mutation.attributeName === 'style' || mutation.attributeName === 'textContent')) {
+                    checkForNetworkError();
+                }
+            });
+        });
+        
+        // Start observing the error element
+        const errorElement = document.getElementById('loginError');
+        observer.observe(errorElement, { attributes: true, childList: true, subtree: true });
       </script>
 
       <script src="storage/js/cloak.js"></script>

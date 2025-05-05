@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Error Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        #error-details {
+            margin-top: 20px;
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Firebase Error Test</h1>
+    <p>This page will help identify the exact Firebase error codes.</p>
+    
+    <div>
+        <button id="test-init">Test Firebase Initialization</button>
+        <button id="test-anonymous">Test Anonymous Auth</button>
+        <button id="test-email">Test Email Auth</button>
+        <button id="test-google">Test Google Auth</button>
+    </div>
+    
+    <div id="status">Ready to run tests...</div>
+    <div id="error-details"></div>
+    <pre id="log"></pre>
+    
+    <script type="module">
+        // Log utility
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+        
+        // Set status
+        function setStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+        
+        // Display error details
+        function showError(error) {
+            const errorElement = document.getElementById('error-details');
+            errorElement.innerHTML = `
+                <h3>Error Details:</h3>
+                <p><strong>Code:</strong> ${error.code || 'N/A'}</p>
+                <p><strong>Message:</strong> ${error.message || 'N/A'}</p>
+                <p><strong>Stack:</strong> ${error.stack || 'N/A'}</p>
+            `;
+            log(`ERROR: ${error.code} - ${error.message}`);
+        }
+        
+        // Load Firebase dynamically to catch and log any loading errors
+        async function loadFirebase() {
+            try {
+                log("Loading Firebase App SDK...");
+                const firebaseApp = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
+                log("Firebase App SDK loaded successfully");
+                
+                log("Loading Firebase Auth SDK...");
+                const firebaseAuth = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
+                log("Firebase Auth SDK loaded successfully");
+                
+                return {
+                    initializeApp: firebaseApp.initializeApp,
+                    getAuth: firebaseAuth.getAuth,
+                    signInAnonymously: firebaseAuth.signInAnonymously,
+                    signInWithEmailAndPassword: firebaseAuth.signInWithEmailAndPassword,
+                    GoogleAuthProvider: firebaseAuth.GoogleAuthProvider,
+                    signInWithPopup: firebaseAuth.signInWithPopup
+                };
+            } catch (error) {
+                log("ERROR LOADING FIREBASE: " + error.message);
+                showError(error);
+                throw error;
+            }
+        }
+        
+        // Test Firebase initialization
+        document.getElementById('test-init').addEventListener('click', async () => {
+            setStatus("Testing Firebase initialization...");
+            
+            try {
+                const firebase = await loadFirebase();
+                
+                // Firebase configuration
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+                    authDomain: "vexplay-33e9f.firebaseapp.com",
+                    projectId: "vexplay-33e9f",
+                    storageBucket: "vexplay-33e9f.firebasestorage.app",
+                    messagingSenderId: "797854431681",
+                    appId: "1:797854431681:web:b09b88437937b9fc551740",
+                    measurementId: "G-KRWYW4Z4Y3"
+                };
+                
+                log("Initializing Firebase with config...");
+                log(JSON.stringify(firebaseConfig, null, 2));
+                
+                const app = firebase.initializeApp(firebaseConfig);
+                log("Firebase initialized successfully!");
+                
+                // Test auth initialization
+                const auth = firebase.getAuth(app);
+                log("Firebase Auth initialized successfully!");
+                
+                setStatus("Firebase initialized successfully");
+            } catch (error) {
+                setStatus("Firebase initialization failed");
+                showError(error);
+            }
+        });
+        
+        // Test anonymous auth
+        document.getElementById('test-anonymous').addEventListener('click', async () => {
+            setStatus("Testing anonymous authentication...");
+            
+            try {
+                const firebase = await loadFirebase();
+                
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+                    authDomain: "vexplay-33e9f.firebaseapp.com",
+                    projectId: "vexplay-33e9f",
+                    storageBucket: "vexplay-33e9f.firebasestorage.app",
+                    messagingSenderId: "797854431681",
+                    appId: "1:797854431681:web:b09b88437937b9fc551740",
+                    measurementId: "G-KRWYW4Z4Y3"
+                };
+                
+                const app = firebase.initializeApp(firebaseConfig);
+                const auth = firebase.getAuth(app);
+                
+                log("Attempting anonymous sign in...");
+                const result = await firebase.signInAnonymously(auth);
+                log("Anonymous sign in successful!");
+                log(`User ID: ${result.user.uid}`);
+                
+                setStatus("Anonymous authentication successful");
+            } catch (error) {
+                setStatus("Anonymous authentication failed");
+                showError(error);
+            }
+        });
+        
+        // Test email auth
+        document.getElementById('test-email').addEventListener('click', async () => {
+            setStatus("Testing email authentication...");
+            
+            try {
+                const firebase = await loadFirebase();
+                
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+                    authDomain: "vexplay-33e9f.firebaseapp.com",
+                    projectId: "vexplay-33e9f",
+                    storageBucket: "vexplay-33e9f.firebasestorage.app",
+                    messagingSenderId: "797854431681",
+                    appId: "1:797854431681:web:b09b88437937b9fc551740",
+                    measurementId: "G-KRWYW4Z4Y3"
+                };
+                
+                const app = firebase.initializeApp(firebaseConfig);
+                const auth = firebase.getAuth(app);
+                
+                log("Attempting email sign in...");
+                const result = await firebase.signInWithEmailAndPassword(auth, "test@example.com", "password123");
+                log("Email sign in successful!");
+                log(`User ID: ${result.user.uid}`);
+                
+                setStatus("Email authentication successful");
+            } catch (error) {
+                setStatus("Email authentication failed");
+                showError(error);
+            }
+        });
+        
+        // Test Google auth
+        document.getElementById('test-google').addEventListener('click', async () => {
+            setStatus("Testing Google authentication...");
+            
+            try {
+                const firebase = await loadFirebase();
+                
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+                    authDomain: "vexplay-33e9f.firebaseapp.com",
+                    projectId: "vexplay-33e9f",
+                    storageBucket: "vexplay-33e9f.firebasestorage.app",
+                    messagingSenderId: "797854431681",
+                    appId: "1:797854431681:web:b09b88437937b9fc551740",
+                    measurementId: "G-KRWYW4Z4Y3"
+                };
+                
+                const app = firebase.initializeApp(firebaseConfig);
+                const auth = firebase.getAuth(app);
+                const provider = new firebase.GoogleAuthProvider();
+                
+                log("Opening Google sign in popup...");
+                const result = await firebase.signInWithPopup(auth, provider);
+                log("Google sign in successful!");
+                log(`User ID: ${result.user.uid}`);
+                
+                setStatus("Google authentication successful");
+            } catch (error) {
+                setStatus("Google authentication failed");
+                showError(error);
+            }
+        });
+        
+        // Initialize the page
+        setStatus("Ready to run tests");
+        log("Firebase Error Test page loaded");
+        log("Click the buttons above to run specific tests");
+    </script>
+</body>
+</html> 

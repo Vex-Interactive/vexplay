@@ -99,10 +99,33 @@ The authentication status is stored in localStorage with the following keys:
 - `userEmail`: Email of registered user (or "guest" for guest users)
 - `userId`: Firebase user ID of registered user (or a random ID for guests)
 
+## Firebase API Security
+
+The Firebase API keys and configuration are protected using client-side encryption:
+
+- All Firebase configuration values are stored encrypted in the source code
+- Configuration is decrypted at runtime using a domain-specific key
+- This provides protection against casual inspection and automated scrapers
+- The encryption uses XOR with a domain-specific key and Base64 encoding
+
+### Updating Firebase Configuration
+
+When you need to update the Firebase configuration:
+
+1. Use the provided encryption tool:
+   ```
+   node encrypt-config.js
+   ```
+
+2. Copy the encrypted output to replace the values in `storage/js/firebase-config.js`
+
+3. For more details on the encryption implementation, refer to the [FIREBASE-SECURITY.md](FIREBASE-SECURITY.md) documentation.
+
 ## Implementation Notes
 
 - The `auth.js` file contains the core authentication logic
 - The `path-protection.js` file prevents direct access to premium content 
 - The `premium-check.js` file provides intermediate blocking of premium content
 - The `game-protection.js` file is the strongest protection for premium game pages
-- All protection methods use URL-based detection instead of line numbers for more reliable protection 
+- All protection methods use URL-based detection instead of line numbers for more reliable protection
+- The `firebase-config.js` file provides encrypted Firebase configuration 
