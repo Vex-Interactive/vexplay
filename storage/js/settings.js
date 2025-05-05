@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function applyStoredTheme() {
-    const storedTheme = localStorage.getItem('selectedTheme');
+    const storedTheme = localStorage.getItem('selectedTheme') || 'cosmic';
 
     hideCustomThemeSettings();
     if (storedTheme === 'custom') {
@@ -13,6 +13,12 @@ function applyStoredTheme() {
         applyCustomThemeStyles();
     }
     applyTheme();
+    
+    // Update the theme select dropdown to match the stored theme
+    const themeSelect = document.getElementById('theme-select');
+    if (themeSelect) {
+        themeSelect.value = storedTheme;
+    }
 }
 
 function hideCustomThemeSettings() {
@@ -31,7 +37,7 @@ function showCustomThemeSettings() {
 
 function populateCustomThemeSettings() {
     const customTheme = JSON.parse(localStorage.getItem('customTheme')) || {};
-    document.getElementById('background-image').value = customTheme['background-image'] || 'https://raw.githubusercontent.com/a456pur/VexPlay/main/images/backgrounds/VexPlay/homebg.png';
+    document.getElementById('background-image').value = customTheme['background-image'] || 'https://raw.githubusercontent.com//VexPlay/main/images/backgrounds/VexPlay/homebg.png';
     document.getElementById('font-family').value = customTheme['font-family'] || 'Ubuntu';
     document.getElementById('text-color').value = customTheme['text-color'] || '#FFFFFF';
     document.getElementById('background-color').value = customTheme['background-color'] || 'black';
@@ -101,6 +107,14 @@ if (storedTheme) {
     const selectElement = document.getElementById('theme-select');
     if (selectElement) {
         selectElement.value = storedTheme;
+        applyStoredTheme();
+    }
+} else {
+    // Set cosmic as the default theme if no theme is stored
+    localStorage.setItem('selectedTheme', 'cosmic');
+    const selectElement = document.getElementById('theme-select');
+    if (selectElement) {
+        selectElement.value = 'cosmic';
         applyStoredTheme();
     }
 }

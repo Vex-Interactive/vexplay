@@ -77,67 +77,92 @@ function cookieConsent() {
             box-sizing: border-box;
             border: 3px solid var(--border-color2);
             border-radius: 16px;
-            padding: 30px 30px 30px 30px;
+            padding: 20px;
+            background: var(--background-color);
             box-shadow: 0px 0px 10px 0px var(--background-color);
             overflow: hidden;
             position: fixed;
-            bottom: 30px;
-            right: 30px;
+            bottom: 20px;
+            right: 20px;
             display: none;
-
             text-align: center;
-
-            background: var(--background-color);
           }
+          
+          /* Login page specific styling */
+          .cookieConsentContainer.on-login-page {
+            bottom: 70px;
+          }
+          
           .cookieConsentContainer .cookieTitle a {
-            color: #ffffff;
-            font-size: 22px;
+            color: var(--text-color);
+            font-size: 20px;
             line-height: 20px;
             display: block;
+            margin-bottom: 10px;
           }
+          
           .cookieConsentContainer .cookieDesc p {
             margin: 0;
             padding: 0;
-            color: #ffffff;
-            font-size: 16px;
-            line-height: 20px;
+            color: var(--text-color);
+            font-size: 14px;
+            line-height: 1.4;
             display: block;
             margin-top: 10px;
+            padding-left: 0;
+            padding-right: 0;
           }
+          
           .cookieConsentContainer .cookieDesc a {
-            color: #ffffff;
+            color: var(--text-color);
             text-decoration: underline;
           }
+          
           .cookieConsentContainer .cookieButton a {
             display: inline-block;
-            color: #ffffff;
-            font-size: 16px;
+            color: var(--text-color);
+            font-size: 14px;
             font-weight: bold;
             margin-top: 14px;
-            backdrop-filter: blur(10px);
-            border: 3px solid var(--border-color2);
+            border: 2px solid var(--border-color2);
             border-radius: 16px;
-            box-sizing: border-box;
-            padding: 15px 24px;
+            padding: 8px 20px;
             text-align: center;
             text-decoration: none;
             transition: background 0.3s;
           }
+          
           .cookieConsentContainer .cookieButton a:hover {
             cursor: pointer;
-            filter: brightness(0.9);
+            background-color: var(--hover-color);
           }
+          
           @media (max-width: 980px) {
             .cookieConsentContainer {
               bottom: 10px !important;
-              left: 0px !important;
-              width: 70% !important;
+              left: 10px !important;
+              right: 10px !important;
+              width: auto !important;
+              max-width: 400px;
               margin: auto;
             }
+            
+            /* Center on mobile in login page */
+            .cookieConsentContainer.on-login-page {
+              left: 50% !important;
+              transform: translateX(-50%);
+              width: 90% !important;
+              max-width: 350px;
+            }
           }
-          
         `;
         document.head.appendChild(style);
+        
+        // Check if we're on the login page and add a class if we are
+        if (window.location.href.includes('login.html') || window.location.href.includes('signup.html')) {
+          cookieConsentContainer.classList.add('on-login-page');
+        }
+        
         cookieConsentContainer.innerHTML = '<div class="cookieTitle"><a>' + purecookieTitle + '</a></div><div class="cookieDesc"><p>' + purecookieDesc + ' ' + purecookieLink + '</p></div><div class="cookieButton"><a onClick="purecookieDismiss();">' + purecookieButton + '</a></div>';
         contentSide.appendChild(cookieConsentContainer);
         pureFadeIn("cookieConsentContainer");

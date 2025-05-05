@@ -1,5 +1,6 @@
 <html lang="en">
     <head>
+        <script src="/storage/js/premium-unblur.js"></script>
         <script async src="https://www.googletagmanager.com/gtag/js?id=GTM-NX2QKP76"></script>
         <script>
           window.dataLayer = window.dataLayer || [];
@@ -52,6 +53,53 @@
                 });
             });
         }
+        </script>
+
+        <!-- Premium content protection -->
+        <script src="/storage/js/auth.js"></script>
+        <script src="/storage/js/auth-fix.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Find line 490 and mark all game links after it as premium
+                const gameLinks = document.querySelectorAll('.button-container a');
+                let isPremiumSection = false;
+                let gameCount = 0;
+                
+                gameLinks.forEach(function(gameLink) {
+                    gameCount++;
+                    
+                    // Line 490 is approximately game #36 (considering HTML structure and spacing)
+                    // We're using game count as a more reliable indicator than actual line numbers
+                    if (gameCount > 36) {
+                        isPremiumSection = true;
+                    }
+                    
+                    // Handle specific previously premium games that should now be free
+                    const href = gameLink.getAttribute('href');
+                    const premiumExceptions = [
+                        'fnaf-2', 'fnaf-3', 'fnaf-4', 'riddleschool', 'driftboss', 
+                        'fnf', 'pacman', 'papaspancakeria', 'rooftop', 'baldisbasics',
+                        'bobtherobber2', 'minesweeper', 'pokemonemerald', 'pokemonfirered',
+                        'supermariobros', 'supermariokart', 'supermarioworld', 'thereisnogame',
+                        'worldshardestgame', 'castlevania', 'donkeykong', 'drmario',
+                        'metroid', 'supermariobros2', 'tinyfishing', 'tetris'
+                    ];
+                    
+                    // If it's in the premium section, mark it as premium content
+                    if (isPremiumSection) {
+                        gameLink.classList.add('premium-content');
+                    } else {
+                        // Make sure previously premium games before line 490 are now free
+                        gameLink.classList.remove('premium-content');
+                    }
+                });
+                
+                // Apply premium content restrictions
+                restrictPremiumContent();
+                
+                // Create lock icons on premium content
+                createLockIcon();
+            });
         </script>
   </head>
   <body>

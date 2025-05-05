@@ -314,3 +314,64 @@ p {
     padding-left: 20%;
     padding-right: 20%;
 }
+/* Premium content styling */
+.premium-content .button {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.premium-content .button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-radius: 16px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.premium-content .button h2 {
+    position: relative;
+    z-index: 5;
+    text-shadow: 0 0 4px #000, 0 0 2px #000;
+}
+
+/* Ensure the premium-content links don't navigate to the game */
+.premium-content {
+    cursor: not-allowed;
+}
+
+/* Hide any existing premium overlay */
+.premium-overlay {
+    display: none !important;
+}
+
+/* Override any conflicting styles */
+.premium-content .button img,
+.premium-content .button .thumbnail {
+    filter: blur(5px);
+}
+
+/* Ensure the h2 text is visible and above the blur */
+.premium-content .button h2 {
+    filter: none !important;
+}
+
+.premium-lock {
+    z-index: 5;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px !important;
+    height: 30px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+}

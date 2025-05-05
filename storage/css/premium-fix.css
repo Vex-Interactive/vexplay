@@ -1,0 +1,45 @@
+/* Premium content fix - removes all visual restrictions for registered users */
+
+/* Remove blur overlay but keep content visible */
+.premium-content .button::before {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: transparent !important;
+}
+
+/* Remove blur from images but keep them visible */
+.premium-content .button img,
+.premium-content .button .thumbnail {
+    filter: none !important;
+}
+
+/* Hide just the overlay elements */
+.premium-overlay {
+    display: none !important;
+}
+
+/* Make sure all premium content is fully visible */
+.premium-content,
+.premium-content .button,
+.premium-content h2 {
+    filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-shadow: none !important;
+}
+
+/* Fix background images */
+.button {
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+/* Remove lock icons from text */
+h2 {
+    text-shadow: none !important;
+}
+
+/* Remove the not-allowed cursor */
+.premium-content {
+    cursor: pointer !important;
+} 

@@ -25,6 +25,7 @@
     <script>
       var gameInstance = UnityLoader.instantiate("gameContainer", "Build/CrazyTunnel3D-g-1.json", {onProgress: UnityProgress,Module:{onRuntimeInitialized: function() {UnityProgress(gameInstance, "complete")}}});
     </script>
+    <script src="/storage/js/game-protection.js"></script>
 </head>
 <body style="overflow:hidden;">
     <div class="webgl-content">

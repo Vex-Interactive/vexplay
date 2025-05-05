@@ -1,5 +1,5 @@
 function applyStoredTheme() {
-    const storedTheme = localStorage.getItem('selectedTheme');
+    const storedTheme = localStorage.getItem('selectedTheme') || 'cosmic';
     if (storedTheme) {
         document.documentElement.className = `theme-${storedTheme}`;
 
