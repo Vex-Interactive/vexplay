@@ -85,20 +85,15 @@
                         'metroid', 'supermariobros2', 'tinyfishing', 'tetris'
                     ];
                     
-                    // If it's in the premium section, mark it as premium content
-                    if (isPremiumSection) {
-                        gameLink.classList.add('premium-content');
-                    } else {
-                        // Make sure previously premium games before line 490 are now free
-                        gameLink.classList.remove('premium-content');
-                    }
+                    // Don't mark any games as premium content since all games are unlocked for guests
+                    // We've removed the premium-content class application for games
                 });
                 
-                // Apply premium content restrictions
-                restrictPremiumContent();
+                // Skip applying premium content restrictions for games
+                // Games should all be accessible now
                 
-                // Create lock icons on premium content
-                createLockIcon();
+                // We don't need to create lock icons for games anymore
+                // createLockIcon() function call removed
             });
         </script>
   </head>

@@ -20,6 +20,19 @@ function getUserId() {
 
 // Check if user can access premium content
 function canAccessPremiumContent() {
+    // Allow access to premium content for regular users (not guests)
+    return isLoggedIn() && !isGuest();
+}
+
+// Check if user can access premium games
+function canAccessPremiumGames() {
+    // Allow ALL users (including guests) to access games
+    return true;
+}
+
+// Check if user can access premium apps
+function canAccessPremiumApps() {
+    // Only allow logged-in NON-guest users to access premium apps
     return isLoggedIn() && !isGuest();
 }
 

@@ -181,42 +181,19 @@
                 // Get all app container elements
                 const allAppLinks = document.querySelectorAll('.button-container > a');
                 
-                // We need to be more precise about which apps to restrict
-                // Instead of counting lines, we'll identify specific apps based on their URLs
-                
                 // Check if user is a guest or not logged in
                 if (isGuest() || !isLoggedIn()) {
-                    // These are the app paths that should be restricted (premium content)
-                    const premiumAppPaths = [
-                        '/webretro/',
-                        '/htmlcoder/',
-                        '/v86/',
-                        '/calculator/',
-                        '/etchasketch/',
-                        '/zipopener/',
-                        '/godoblocks/'
-                        // Add more premium app paths as needed
-                    ];
-                    
-                    // Loop through all app links and check if they're premium
+                    // Lock ALL apps for guests by adding premium-content class to every app
                     allAppLinks.forEach((appLink) => {
                         const href = appLink.getAttribute('href');
                         
-                        // Check if this link matches any premium app path
-                        const isPremium = premiumAppPaths.some(path => 
-                            href && href.toLowerCase().includes(path.toLowerCase())
-                        );
+                        // Store original href
+                        appLink.setAttribute('data-original-href', href);
                         
-                        // If it's a premium app, mark it as premium content
-                        if (isPremium) {
-                            // Add premium-content class to enable restrictions
-                            appLink.classList.add('premium-content');
-                            
-                            // Store original href
-                            appLink.setAttribute('data-original-href', href);
-                            
-                            console.log("Restricted app:", href); // Debugging
-                        }
+                        // Add premium-content class to enable restrictions
+                        appLink.classList.add('premium-content');
+                        
+                        console.log("Restricted app:", href); // Debugging
                     });
                     
                     // Apply premium content restrictions
