@@ -1,0 +1,86 @@
+# Channel System Information
+
+The chat system has been set up with a simple, fixed set of channels without the ability to create custom channels:
+
+- #general - For general discussion
+- #games - For game discussion and suggestions
+- #help - For getting help with VexPlay
+- #memes - For sharing memes
+
+## Firestore Structure
+
+The chat messages are stored in Firestore with the following structure:
+
+```
+channels/
+  general/
+    messages/
+      message1
+      message2
+      ...
+  games/
+    messages/
+      message1
+      message2
+      ...
+  help/
+    messages/
+      ...
+  memes/
+    messages/
+      ...
+```
+
+## Firestore Security Rules
+
+You should update your Firestore security rules to the following:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow authenticated users to read/write to channel messages
+    match /channels/{channelId}/messages/{messageId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow read access to channel documents but no writes (channels are fixed)
+    match /channels/{channelId} {
+      allow read: if request.auth != null;
+      // No write access as we're keeping channels fixed
+    }
+    
+    // Allow users to read all user profiles
+    match /userProfiles/{userId} {
+      // Anyone can read profiles
+      allow read: if request.auth != null;
+      
+      // Users can only write to their own profile
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Legacy rule for old messages - to be removed after migration
+    match /eu3_chat_messages/{document=**} {
+      allow read: if request.auth != null;
+      // Only allow reads to legacy messages
+    }
+  }
+}
+```
+
+## Migration from Old System
+
+If you have existing messages in the old `eu3_chat_messages` collection, you'll need to migrate them to the new channel-based structure. You can create a script to:
+
+1. Read all messages from `eu3_chat_messages`
+2. Sort them by timestamp
+3. Write them to the appropriate channel collection based on their content or just move all to #general
+
+## Benefits of Fixed Channels
+
+Having fixed channels instead of user-created ones provides several benefits:
+
+1. Simplified management - No need to handle channel creation, permissions, etc.
+2. Better organization - Users always know where to post specific content
+3. Improved moderation - Easier to monitor a fixed set of channels
+4. Reduced clutter - Prevents creation of redundant or rarely used channels 

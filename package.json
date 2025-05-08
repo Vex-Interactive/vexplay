@@ -1,6 +1,6 @@
 {
   "name": "vexplay",
-  "version": "12.1.0",
+  "version": "12.2.0",
   "description": "An open source games site hosting 500+ games",
   "main": "index.html",
   "dependencies": {
