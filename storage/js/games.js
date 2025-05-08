@@ -55,6 +55,19 @@ function filterGames() {
 
 document.getElementById('search').addEventListener('input', filterGames);
 
+// Add keyboard shortcut for search (press '/' to focus search)
+document.addEventListener('keydown', function(e) {
+    // Don't trigger if already in an input field
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && 
+        document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault(); // Prevent typing '/' in any input field
+        const searchInput = document.getElementById('search');
+        if (searchInput) {
+            searchInput.focus();
+        }
+    }
+});
+
 // genre filtering
 const genreDropdown = document.getElementById('genreDropdown');
 
@@ -142,7 +155,86 @@ document.addEventListener("DOMContentLoaded", function () {
     const pinnedHeader = document.querySelector(".pinned-header");
     const allGamesHeader = document.querySelector(".allgames-header")
 
-    const pinnedGames = JSON.parse(localStorage.getItem("pinnedGames")) || [];
+    // Check if user is logged in (non-guest)
+    const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+    const isGuest = localStorage.getItem('isGuest') === 'true';
+    const userId = localStorage.getItem('userId');
+    const canFavorite = isLoggedIn && !isGuest && userId;
+    
+    // Get pinned games from localStorage initially (will be replaced with Firestore data for logged-in users)
+    let pinnedGames = JSON.parse(localStorage.getItem("pinnedGames")) || [];
+    
+    // Firebase reference
+    let db = null;
+    
+    // Initialize Firebase if it's available and user is logged in
+    if (canFavorite) {
+        try {
+            // Check if Firebase is loaded
+            if (typeof firebase !== 'undefined' && typeof firebase.firestore === 'function') {
+                db = firebase.firestore();
+                console.log("Firebase initialized for game favorites");
+                
+                // Load pinned games from Firestore for logged-in users
+                loadFavoritesFromFirestore();
+            } else {
+                console.warn("Firebase not available for favorites, falling back to localStorage");
+                // Wait a bit and try again if Firebase might be loading
+                setTimeout(() => {
+                    if (typeof firebase !== 'undefined' && typeof firebase.firestore === 'function') {
+                        db = firebase.firestore();
+                        console.log("Firebase initialized for game favorites (delayed)");
+                        loadFavoritesFromFirestore();
+                    }
+                }, 2000);
+            }
+        } catch (error) {
+            console.error("Error initializing Firebase for favorites:", error);
+        }
+    }
+    
+    // Function to load favorites from Firestore
+    async function loadFavoritesFromFirestore() {
+        if (!db || !userId) return;
+        
+        try {
+            const doc = await db.collection('userProfiles').doc(userId).get();
+            if (doc.exists && doc.data().pinnedGames) {
+                pinnedGames = doc.data().pinnedGames;
+                localStorage.setItem("pinnedGames", JSON.stringify(pinnedGames));
+                console.log("Loaded pinned games from Firestore:", pinnedGames);
+                updatePinnedUI();
+            }
+        } catch (error) {
+            console.error("Error loading favorites from Firestore:", error);
+        }
+    }
+    
+    // Function to save favorites to Firestore
+    async function saveFavoritesToFirestore() {
+        if (!db || !userId) return;
+        
+        try {
+            await db.collection('userProfiles').doc(userId).update({
+                pinnedGames: pinnedGames,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log("Saved pinned games to Firestore");
+        } catch (error) {
+            console.error("Error saving favorites to Firestore:", error);
+            
+            // If update fails (document might not exist), try set with merge
+            try {
+                await db.collection('userProfiles').doc(userId).set({
+                    pinnedGames: pinnedGames,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                console.log("Created pinnedGames in Firestore profile");
+            } catch (setError) {
+                console.error("Error creating pinnedGames in Firestore:", setError);
+            }
+        }
+    }
 
     function updatePinnedUI() {
         if (pinnedGames.length === 0) {
@@ -188,21 +280,91 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function pinGame(name, thumbnail, link) {
+        // Check if user can favorite games
+        if (!canFavorite) {
+            // Show login prompt
+            showLoginToFavoritePrompt();
+            return;
+        }
+        
         const isAlreadyPinned = pinnedGames.some((game) => game.name === name);
         if (!isAlreadyPinned) {
             pinnedGames.push({ name, thumbnail, link });
             localStorage.setItem("pinnedGames", JSON.stringify(pinnedGames));
+            
+            // If Firebase is available, save to Firestore
+            if (db) {
+                saveFavoritesToFirestore();
+            }
+            
             updatePinnedUI();
         }
     }
 
     function unpinGame(name) {
+        // Check if user can favorite games
+        if (!canFavorite) {
+            // Show login prompt
+            showLoginToFavoritePrompt();
+            return;
+        }
+        
         const index = pinnedGames.findIndex((game) => game.name === name);
         if (index !== -1) {
             pinnedGames.splice(index, 1);
             localStorage.setItem("pinnedGames", JSON.stringify(pinnedGames));
+            
+            // If Firebase is available, save to Firestore
+            if (db) {
+                saveFavoritesToFirestore();
+            }
+            
             updatePinnedUI();
         }
+    }
+    
+    function showLoginToFavoritePrompt() {
+        // Check if we already have a prompt
+        if (document.getElementById('login-favorite-prompt')) {
+            return;
+        }
+        
+        // Create a prompt div
+        const promptDiv = document.createElement('div');
+        promptDiv.id = 'login-favorite-prompt';
+        promptDiv.style.position = 'fixed';
+        promptDiv.style.top = '50%';
+        promptDiv.style.left = '50%';
+        promptDiv.style.transform = 'translate(-50%, -50%)';
+        promptDiv.style.backgroundColor = 'var(--background-color)';
+        promptDiv.style.padding = '20px';
+        promptDiv.style.borderRadius = '10px';
+        promptDiv.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+        promptDiv.style.zIndex = '1000';
+        promptDiv.style.maxWidth = '400px';
+        promptDiv.style.textAlign = 'center';
+        promptDiv.style.border = '3px solid var(--border-color2)';
+        
+        promptDiv.innerHTML = `
+            <h3>Login Required</h3>
+            <p>You need to be logged in to favorite games.</p>
+            <p>Favorited games will be available on all your devices.</p>
+            <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                <button id="cancel-favorite" style="padding: 8px 16px; background-color: var(--background-color); color: var(--text-color); border: 2px solid var(--border-color2); border-radius: 5px; cursor: pointer;">Cancel</button>
+                <button id="login-to-favorite" style="padding: 8px 16px; background-color: var(--background-color); color: var(--text-color); border: 2px solid var(--border-color2); border-radius: 5px; cursor: pointer;">Login</button>
+            </div>
+        `;
+        
+        document.body.appendChild(promptDiv);
+        
+        // Event listeners for buttons
+        document.getElementById('cancel-favorite').addEventListener('click', () => {
+            promptDiv.remove();
+        });
+        
+        document.getElementById('login-to-favorite').addEventListener('click', () => {
+            window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.href);
+        });
     }
 
     pinButtons.forEach((pinButton, index) => {

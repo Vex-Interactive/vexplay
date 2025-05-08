@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>VexPlay Chat</title>
+        <link rel="stylesheet" href="/storage/css/themes.css">
+        <script src="/storage/js/theme.js"></script>
+        <style>
+            :root {
+                --primary-color: #4a90e2;
+                --secondary-color: #2c3e50;
+                --text-color: #333;
+                --light-text: #fff;
+                --background-color: #f5f6fa;
+                --chat-bg: #fff;
+                --message-bg: #e9ecef;
+                --my-message-bg: #4a90e2;
+                --border-radius: 16px;
+                --spacing: 8px;
+                --bubble-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: var(--font-family);
+                background-color: var(--background-color);
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                background-image: var(--background-image);
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+            }
+
+            .chat-wrapper {
+                max-width: 600px;
+                margin: 20px auto;
+                background-color: rgba(0, 0, 0, 0.5);
+                border: 2px solid var(--border-color2);
+                border-radius: 18px;
+                backdrop-filter: blur(6px);
+                height: 80vh;
+                min-height: 400px;
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            }
+            
+            .chat-header {
+                padding: 12px 20px;
+                background-color: rgba(0, 0, 0, 0.25);
+                border-bottom: 2px solid var(--border-color2);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-top-left-radius: 16px;
+                border-top-right-radius: 16px;
+            }
+            
+            .chat-header h1 {
+                margin: 0;
+                color: var(--text-color);
+                font-size: 1.3rem;
+                text-shadow: 0 0 10px var(--text-glow);
+            }
+            
+            .home-button {
+                color: var(--text-color);
+                background: rgba(0, 0, 0, 0.3);
+                border: 1px solid var(--border-color2);
+                border-radius: 8px;
+                padding: 6px 12px;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin-right: 10px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            .home-button:hover {
+                background: rgba(74, 144, 226, 0.3);
+                color: white;
+            }
+            
+            .chat-header-content {
+                display: flex;
+                align-items: center;
+            }
+            
+            .user-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background-color: var(--primary-color);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--light-text);
+                font-weight: bold;
+                font-size: 1.1rem;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            }
+            
+            .chat-messages {
+                flex: 1;
+                overflow-y: auto;
+                padding: 18px 12px;
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+                background: transparent;
+            }
+            
+            .message {
+                max-width: 80%;
+                padding: 8px 14px 18px 14px;
+                border-radius: var(--border-radius);
+                position: relative;
+                animation: messageAppear 0.25s ease-out;
+                box-shadow: var(--bubble-shadow);
+                font-size: 1rem;
+                transition: background 0.15s, box-shadow 0.15s, transform 0.12s;
+                word-break: break-word;
+                overflow: visible;
+            }
+
+            .message.sent {
+                align-self: flex-end;
+                background-color: var(--my-message-bg);
+                color: var(--light-text);
+                border-bottom-right-radius: 4px;
+                border-top-right-radius: 18px;
+            }
+
+            .message.received {
+                align-self: flex-start;
+                background-color: rgba(30, 30, 30, 0.7);
+                color: #e0e0e0;
+                border-bottom-left-radius: 4px;
+                border-top-left-radius: 18px;
+                border: 1px solid var(--border-color2);
+            }
+
+            .message:hover {
+                background: #e3e9f7;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+                transform: translateY(-2px) scale(1.01);
+            }
+            .message.sent:hover {
+                background: #5aa6f7;
+            }
+            .message.received:hover {
+                background: rgba(50, 50, 50, 0.9);
+                color: #ffffff;
+            }
+
+            .message .sender {
+                font-size: 0.82rem;
+                margin-bottom: 2px;
+                opacity: 0.7;
+                font-weight: 500;
+            }
+
+            .message .time {
+                font-size: 0.75rem;
+                opacity: 0.6;
+                position: absolute;
+                bottom: 4px;
+                right: 12px;
+            }
+
+            .chat-input-container {
+                padding: 10px 16px;
+                background-color: rgba(0, 0, 0, 0.18);
+                border-top: 2px solid var(--border-color2);
+                border-bottom-left-radius: 16px;
+                border-bottom-right-radius: 16px;
+                box-shadow: 0 -2px 12px rgba(0,0,0,0.10);
+            }
+
+            .chat-input-wrapper {
+                display: flex;
+                gap: 0;
+                background: rgba(30,30,30,0.7);
+                border-radius: 12px;
+                border: 2px solid var(--border-color2);
+                overflow: hidden;
+                align-items: center;
+            }
+
+            .chat-input {
+                flex: 1;
+                padding: 10px 14px;
+                border: none;
+                background: transparent;
+                color: var(--text-color);
+                font-size: 1rem;
+                font-family: var(--font-family);
+                outline: none;
+                box-shadow: none;
+            }
+
+            .chat-input:focus {
+                background: rgba(255,255,255,0.07);
+            }
+
+            .send-button {
+                padding: 10px 22px;
+                background-color: var(--primary-color);
+                color: var(--light-text);
+                border: none;
+                border-radius: 0 12px 12px 0;
+                cursor: pointer;
+                font-size: 1rem;
+                font-weight: 600;
+                transition: background-color 0.18s, box-shadow 0.15s;
+                box-shadow: none;
+                height: 100%;
+            }
+
+            .send-button:hover {
+                background-color: #3578c7;
+            }
+
+            .login-container {
+                max-width: 400px;
+                margin: 100px auto;
+                padding: 20px;
+                background-color: rgba(0, 0, 0, 0.5);
+                border: 2px solid var(--border-color2);
+                border-radius: 16px;
+                text-align: center;
+                backdrop-filter: blur(5px);
+            }
+            
+            .login-container h2 {
+                color: var(--text-color);
+                margin-bottom: 20px;
+                text-shadow: 0 0 10px var(--text-glow);
+            }
+
+            .login-button {
+                padding: 12px 24px;
+                background-color: var(--primary-color);
+                color: var(--light-text);
+                border: none;
+                border-radius: var(--border-radius);
+                cursor: pointer;
+                font-size: 1rem;
+                transition: background-color 0.2s;
+            }
+
+            .login-button:hover {
+                background-color: var(--hover-color);
+            }
+            
+            /* Lock icon for unregistered users */
+            .lock-icon {
+                font-size: 48px;
+                margin-bottom: 15px;
+                color: var(--primary-color);
+                opacity: 0.9;
+                text-shadow: 0 0 15px rgba(74, 144, 226, 0.6);
+            }
+            
+            .register-note {
+                margin: 15px 0;
+                font-size: 14px;
+                color: #aaa;
+                padding: 10px;
+                background-color: rgba(0, 0, 0, 0.2);
+                border-radius: 8px;
+                border-left: 3px solid var(--primary-color);
+            }
+            
+            @keyframes messageAppear {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Scrollbar styling */
+            .chat-messages::-webkit-scrollbar {
+                width: 8px;
+            }
+            .chat-messages::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.13);
+                border-radius: 4px;
+            }
+            .chat-messages::-webkit-scrollbar-thumb {
+                background: var(--border-color2);
+                border-radius: 4px;
+            }
+            .chat-messages::-webkit-scrollbar-thumb:hover {
+                background: var(--hover-color);
+            }
+
+            /* Responsive */
+            @media (max-width: 700px) {
+                .chat-wrapper {
+                    max-width: 98vw;
+                    height: 95vh;
+                }
+                .chat-header, .chat-input-container {
+                    padding-left: 8px;
+                    padding-right: 8px;
+                }
+                .chat-messages {
+                    padding: 10px 2px;
+                }
+            }
+
+            /* --- Reply Feature Styles --- */
+            .reply-preview {
+                background: rgba(30,30,30,0.7);
+                color: #b0b0b0;
+                border-left: 4px solid var(--primary-color);
+                padding: 6px 12px;
+                margin-bottom: 6px;
+                border-radius: 8px;
+                font-size: 0.95em;
+                max-width: 90%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .reply-cancel {
+                background: none;
+                border: none;
+                color: #e57373;
+                font-size: 1.1em;
+                cursor: pointer;
+                margin-left: 8px;
+            }
+            .reply-context {
+                background: rgba(30,30,30,0.5);
+                color: #b0b0b0;
+                border-left: 4px solid var(--primary-color);
+                padding: 4px 10px;
+                border-radius: 7px 7px 7px 7px;
+                font-size: 0.85em;
+                margin-bottom: 2px;
+                max-width: 90%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .reply-btn {
+                background: rgba(30, 30, 30, 0.75);
+                border: none;
+                color: white;
+                font-size: 1.2em;
+                cursor: pointer;
+                margin-left: 0;
+                opacity: 0.9;
+                transition: all 0.15s;
+                vertical-align: middle;
+                border-radius: 4px;
+                width: 28px;
+                height: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            }
+            .reply-btn:hover {
+                color: white;
+                opacity: 1;
+                background: var(--primary-color);
+                transform: scale(1.15);
+            }
+            .delete-btn {
+                background: rgba(30, 30, 30, 0.75); 
+                border: none;
+                color: white;
+                font-size: 1.2em;
+                cursor: pointer;
+                margin-left: 0;
+                opacity: 0.9;
+                transition: all 0.15s;
+                vertical-align: middle;
+                border-radius: 4px;
+                width: 28px;
+                height: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            }
+            .delete-btn:hover {
+                color: white;
+                opacity: 1;
+                background: #e74c3c;
+                transform: scale(1.15);
+            }
+
+            .message-actions {
+                position: absolute;
+                top: 6px;
+                right: 10px;
+                display: flex;
+                gap: 2px;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.15s;
+            }
+            .message:hover .message-actions {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            /* Media Button Styles */
+            .media-button-container {
+                position: relative;
+                margin-right: 8px;
+            }
+            .media-button {
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                background: rgba(60, 60, 60, 0.6);
+                color: #ddd;
+                font-size: 20px;
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s;
+                position: relative;
+                animation: pulse 2s infinite;
+            }
+            .media-button:hover {
+                background: rgba(80, 80, 80, 0.8);
+                color: white;
+                animation: none;
+            }
+            .backup-media-button {
+                background: #4a90e2;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                padding: 5px 10px;
+                margin-right: 10px;
+                cursor: pointer;
+                font-weight: bold;
+                box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            }
+            .backup-media-button:hover {
+                background: #3578c7;
+            }
+            @keyframes pulse {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.7);
+                }
+                70% {
+                    box-shadow: 0 0 0 5px rgba(74, 144, 226, 0);
+                }
+                100% {
+                    box-shadow: 0 0 0 0 rgba(74, 144, 226, 0);
+                }
+            }
+            .media-options {
+                position: absolute;
+                bottom: 45px;
+                left: 0;
+                background: rgba(20, 20, 20, 0.95);
+                border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+                display: none;
+                flex-direction: column;
+                overflow: hidden;
+                min-width: 150px;
+                z-index: 100;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            .media-option {
+                padding: 10px 12px;
+                color: #eee;
+                cursor: pointer;
+                transition: background 0.15s;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .media-option:hover {
+                background: rgba(80, 80, 80, 0.8);
+            }
+            .media-option i {
+                font-size: 18px;
+                width: 20px;
+                text-align: center;
+            }
+            /* Media Search Dialog */
+            .media-search-dialog {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.8);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+                backdrop-filter: blur(5px);
+            }
+            
+            .media-search-container {
+                width: 90%;
+                max-width: 600px;
+                background-color: rgba(15, 15, 15, 0.95);
+                border: 2px solid var(--border-color2);
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+            
+            .media-dialog-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+            
+            .media-dialog-header h3 {
+                margin: 0;
+                color: white;
+            }
+            
+            .media-dialog-close {
+                background: none;
+                color: white;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                opacity: 0.7;
+                transition: opacity 0.2s;
+            }
+            
+            .media-dialog-close:hover {
+                opacity: 1;
+                color: #ff5555;
+            }
+            
+            .media-search-bar {
+                display: flex;
+                margin-bottom: 15px;
+            }
+            
+            #mediaSearchInput {
+                flex: 1;
+                padding: 10px 15px;
+                border: 1px solid var(--border-color2);
+                border-radius: 6px 0 0 6px;
+                background-color: rgba(30, 30, 30, 0.8);
+                color: white;
+                outline: none;
+            }
+            
+            .media-search-button {
+                padding: 10px 15px;
+                background-color: var(--primary-color);
+                color: white;
+                border: 1px solid var(--border-color2);
+                border-left: none;
+                border-radius: 0 6px 6px 0;
+                cursor: pointer;
+            }
+            
+            .media-results {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+                max-height: 50vh;
+                overflow-y: auto;
+                padding-right: 10px;
+            }
+            
+            .media-item {
+                position: relative;
+                cursor: pointer;
+                border-radius: 8px;
+                overflow: hidden;
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+            
+            .media-item:hover {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
+            }
+            
+            .media-item img {
+                width: 100%;
+                height: 100px;
+                object-fit: cover;
+                display: block;
+            }
+            
+            /* Toast Notification */
+            .toast-notification {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: rgba(15, 15, 15, 0.9);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                z-index: 2000;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                opacity: 0;
+                transition: opacity 0.3s, transform 0.3s;
+                pointer-events: none;
+            }
+            
+            .toast-notification.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-10px);
+            }
+            
+            .toast-notification.success {
+                border-left: 4px solid #4CAF50;
+            }
+            
+            .toast-notification.error {
+                border-left: 4px solid #F44336;
+            }
+            
+            .toast-notification.info {
+                border-left: 4px solid #2196F3;
+            }
+            
+            /* AI Message Styling */
+            .ai-message {
+                background-color: rgba(25, 118, 210, 0.7) !important;
+                border: 1px solid rgba(25, 118, 210, 0.4) !important;
+                color: white !important;
+            }
+            
+            .ai-message:hover {
+                background-color: rgba(25, 118, 210, 0.8) !important;
+            }
+            
+            .ai-sender {
+                font-weight: bold;
+                color: #ffeb3b;
+            }
+            
+            .ai-sender::after {
+                content: " 🧠";
+                font-size: 0.9em;
+                opacity: 0.8;
+                margin-left: 2px;
+                vertical-align: top;
+            }
+            
+            /* Help tooltip for AI commands */
+            .ai-command-help {
+                position: absolute;
+                bottom: 90px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: rgba(15, 15, 15, 0.95);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                z-index: 100;
+                width: 90%;
+                max-width: 400px;
+                font-size: 14px;
+                line-height: 1.5;
+                text-align: center;
+                border: 1px solid var(--primary-color);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s, transform 0.3s;
+            }
+            
+            .ai-command-help.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-10px);
+                pointer-events: auto;
+            }
+            
+            .ai-command-help kbd {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 2px 5px;
+                border-radius: 4px;
+                font-family: monospace;
+                margin: 0 3px;
+            }
+
+            .login-container .home-button {
+                margin-top: 10px;
+                background: rgba(35, 35, 35, 0.5);
+                color: #e0e0e0;
+                border: 1px solid var(--border-color2);
+                padding: 8px 15px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+            }
+
+            .login-container .home-button:hover {
+                background: rgba(74, 144, 226, 0.3);
+                color: white;
+            }
+
+            /* Report Message Dialog */
+            .report-dialog {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.8);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+                backdrop-filter: blur(5px);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .report-container {
+                width: 90%;
+                max-width: 500px;
+                background-color: rgba(15, 15, 15, 0.95);
+                border: 2px solid var(--border-color2);
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                color: #e0e0e0;
+                transform: translateY(0);
+                transition: transform 0.3s ease;
+                overflow: hidden;
+                box-sizing: border-box;
+            }
+
+            .report-dialog-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding-bottom: 10px;
+            }
+
+            .report-dialog-header h3 {
+                margin: 0;
+                color: white;
+                font-size: 1.2rem;
+            }
+
+            .report-dialog-close {
+                background: none;
+                color: white;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                opacity: 0.7;
+                transition: opacity 0.2s;
+            }
+
+            .report-dialog-close:hover {
+                opacity: 1;
+                color: #ff5555;
+            }
+
+            .report-content {
+                margin-bottom: 20px;
+                width: 100%;
+                overflow: hidden;
+                box-sizing: border-box;
+            }
+
+            .report-message-preview {
+                background-color: rgba(50, 50, 50, 0.5);
+                border-left: 4px solid #f44336;
+                padding: 12px;
+                margin: 10px 0;
+                border-radius: 4px;
+                font-style: italic;
+                word-break: break-word;
+                max-height: 100px;
+                overflow-y: auto;
+                line-height: 1.4;
+                white-space: pre-wrap;
+                width: auto;
+                max-width: 100%;
+                text-overflow: ellipsis;
+                box-sizing: border-box;
+            }
+
+            /* Improve scrollbar styling for report dialog */
+            .report-message-preview::-webkit-scrollbar {
+                width: 8px;
+            }
+            .report-message-preview::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.13);
+                border-radius: 4px;
+            }
+            .report-message-preview::-webkit-scrollbar-thumb {
+                background: var(--border-color2);
+                border-radius: 4px;
+            }
+            .report-message-preview::-webkit-scrollbar-thumb:hover {
+                background: var(--hover-color);
+            }
+
+            .report-form-group {
+                margin-bottom: 15px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .report-form-group label {
+                display: block;
+                margin-bottom: 6px;
+                color: #ccc;
+                font-weight: 600;
+            }
+
+            .report-reason-select {
+                width: 100%;
+                padding: 10px;
+                background-color: rgba(30, 30, 30, 0.8);
+                color: white;
+                border: 1px solid var(--border-color2);
+                border-radius: 6px;
+                font-family: var(--font-family);
+                font-size: 1rem;
+                box-sizing: border-box;
+            }
+
+            .report-reason-select option {
+                background-color: #222;
+            }
+
+            .report-additional-notes {
+                width: 100%;
+                height: 80px;
+                padding: 10px;
+                background-color: rgba(30, 30, 30, 0.8);
+                color: white;
+                border: 1px solid var(--border-color2);
+                border-radius: 6px;
+                resize: vertical;
+                font-family: var(--font-family);
+                font-size: 1rem;
+                line-height: 1.4;
+                box-sizing: border-box;
+                overflow: auto;
+            }
+
+            .report-buttons {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .report-cancel {
+                padding: 8px 16px;
+                background-color: rgba(80, 80, 80, 0.6);
+                color: white;
+                border: 1px solid var(--border-color2);
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 0.9rem;
+                transition: background-color 0.2s;
+                min-width: 80px;
+                text-align: center;
+            }
+
+            .report-submit {
+                padding: 8px 16px;
+                background-color: #f44336;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 0.9rem;
+                transition: background-color 0.2s;
+                min-width: 120px;
+                text-align: center;
+            }
+
+            .report-submit:hover {
+                background-color: #d32f2f;
+            }
+
+            .report-cancel:hover {
+                background-color: rgba(100, 100, 100, 0.8);
+            }
+
+            .report-btn {
+                background: rgba(30, 30, 30, 0.75);
+                border: none;
+                color: #ff6b6b;
+                font-size: 1.2em;
+                cursor: pointer;
+                opacity: 0.9;
+                transition: all 0.15s;
+                vertical-align: middle;
+                border-radius: 4px;
+                width: 28px;
+                height: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            }
+
+            .report-btn:hover {
+                color: white;
+                opacity: 1;
+                background: #f44336;
+                transform: scale(1.15);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="loginContainer" class="login-container">
+            <h2>Welcome to VexPlay Chat</h2>
+            <div class="lock-icon">🔒</div>
+            <p>Please log in to start chatting</p>
+            <button class="login-button" onclick="window.location.href='/login.html'">Login</button>
+            <button class="home-button" style="margin-top: 10px;" onclick="window.location.href='/index.html'">🏠 Back to Homepage</button>
+            <div class="register-note">Registration is required to keep our community safe and friendly.</div>
+            </div>
+            
+        <div id="chatWrapper" class="chat-wrapper" style="display: none;">
+                <div class="chat-header">
+                <div class="chat-header-content">
+                    <button class="home-button" onclick="window.location.href='/index.html'">🏠 Home</button>
+                <h1>VexPlay Chat</h1>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar"></div>
+                    <span id="userName"></span>
+                    </div>
+                </div>
+                
+            <div id="chatMessages" class="chat-messages"></div>
+
+            <div class="chat-input-container">
+                <div id="replyPreview" style="display:none;"></div>
+                <div class="chat-input-wrapper">
+                    <div class="media-button-container">
+                        <button class="media-button" title="Add media" id="mediaButton" onclick="toggleMediaOptions(event)">+</button>
+                        <button class="backup-media-button" onclick="toggleMediaOptions(event)" title="Media options">Media</button>
+                        <div class="media-options" id="mediaOptions">
+                            <div class="media-option" onclick="showMediaSearch('giphy')">
+                                <i>🎬</i> Search GIFs
+                </div>
+                            <div class="media-option" onclick="showMediaSearch('imgur')">
+                                <i>🖼️</i> Search Images
+                </div>
+            </div>
+        </div>
+                    <input type="text" id="messageInput" class="chat-input" placeholder="Type your message...">
+                    <button id="sendButton" class="send-button">Send</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add Media Search Dialog -->
+        <div id="mediaSearchDialog" class="media-search-dialog">
+            <div class="media-search-container">
+                <div class="media-dialog-header">
+                    <h3 id="mediaDialogTitle">Search Media</h3>
+                    <button class="media-dialog-close" onclick="closeMediaSearch()">&times;</button>
+                </div>
+                <div class="media-search-bar">
+                    <input type="text" id="mediaSearchInput" placeholder="Search...">
+                    <button class="media-search-button">Search</button>
+                </div>
+                <div id="mediaResults" class="media-results"></div>
+            </div>
+        </div>
+        
+        <!-- Notification Toast -->
+        <div id="toast" class="toast-notification"></div>
+        
+        <!-- Report Message Dialog -->
+        <div id="reportDialog" class="report-dialog">
+            <div class="report-container">
+                <div class="report-dialog-header">
+                    <h3>Report Message</h3>
+                    <button class="report-dialog-close" onclick="closeReportDialog()">&times;</button>
+                </div>
+                <div class="report-content">
+                    <p>You are about to report this message:</p>
+                    <div id="reportMessagePreview" class="report-message-preview"></div>
+                    <p>Please select a reason for reporting this message:</p>
+                    
+                    <div class="report-form-group">
+                        <label for="reportReason">Reason:</label>
+                        <select id="reportReason" class="report-reason-select">
+                            <option value="">-- Select a reason --</option>
+                            <option value="inappropriate">Inappropriate content</option>
+                            <option value="harassment">Harassment or bullying</option>
+                            <option value="spam">Spam or advertising</option>
+                            <option value="offensive">Offensive language</option>
+                            <option value="threat">Threatening content</option>
+                            <option value="personal">Sharing personal information</option>
+                            <option value="other">Other reason</option>
+                        </select>
+                    </div>
+                    
+                    <div class="report-form-group">
+                        <label for="reportNotes">Additional notes (optional):</label>
+                        <textarea id="reportNotes" class="report-additional-notes" placeholder="Please provide any additional context..."></textarea>
+                    </div>
+                </div>
+                <div class="report-buttons">
+                    <button class="report-cancel" onclick="closeReportDialog()">Cancel</button>
+                    <button class="report-submit" onclick="submitReport()">Submit Report</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Firebase SDK -->
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-auth-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore-compat.js"></script>
+
+        <!-- EmailJS for email notifications -->
+        <script type="text/javascript" src="https://cdn.emailjs.com/sdk/2.3.2/email.min.js"></script>
+
+        <script>
+            // Check if EmailJS loaded correctly
+            window.onload = function() {
+                // Check if EmailJS SDK loaded properly
+                if (typeof emailjs === 'undefined') {
+                    console.error("EmailJS SDK failed to load properly");
+                } else {
+                    console.log("EmailJS SDK loaded successfully");
+                    // Initialize EmailJS with your public key
+                    initEmailJS();
+                }
+            };
+            
+            // Unregister existing service workers to fix offline-worker.js errors
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                        for (let registration of registrations) {
+                            console.log("Unregistering service worker for chat page");
+                            registration.unregister();
+                        }
+                    });
+                });
+            }
+            
+            // Session management validation - improved version
+            function validateSession() {
+                const sessionLastActivity = localStorage.getItem('sessionLastActivity');
+                const sessionId = localStorage.getItem('sessionId');
+                const userLoggedIn = localStorage.getItem('userLoggedIn');
+                const currentTime = Date.now();
+                
+                // If user is explicitly logged in, always consider session valid
+                // This prevents unwanted logouts when navigating
+                if (userLoggedIn === 'true') {
+                    // Just update the timestamp and return valid
+                    localStorage.setItem('sessionLastActivity', currentTime.toString());
+                    return true;
+                }
+                
+                // Only do strict validation for access control, not for normal navigation
+                if (!sessionLastActivity || !sessionId || !userLoggedIn || 
+                    (currentTime - parseInt(sessionLastActivity)) > (24 * 60 * 60 * 1000)) {
+                    
+                    console.log("Session validation check failed");
+                    
+                    // Don't clear localStorage here, just redirect to login
+                    // This prevents data loss when users are just navigating normally
+                    
+                    // Redirect to login page with the correct .html extension
+                    window.location.href = '/login.html?redirect=chat.html';
+                    return false;
+                }
+                
+                // Update last activity time
+                localStorage.setItem('sessionLastActivity', currentTime.toString());
+                return true;
+            }
+            
+            // Simplified session validation - just for periodic checks
+            // This won't redirect automatically
+            function checkSessionValid() {
+                const sessionLastActivity = localStorage.getItem('sessionLastActivity');
+                const sessionId = localStorage.getItem('sessionId');
+                const userLoggedIn = localStorage.getItem('userLoggedIn');
+                const currentTime = Date.now();
+                
+                if (!sessionLastActivity || !sessionId || !userLoggedIn || 
+                    (currentTime - parseInt(sessionLastActivity)) > (24 * 60 * 60 * 1000)) {
+                    return false;
+                }
+                
+                return true;
+            }
+            
+            // User activity heartbeat to keep session active during use
+            function setupActivityHeartbeat() {
+                // List of events to track for user activity
+                const activityEvents = [
+                    'mousedown', 'mousemove', 'keypress', 
+                    'scroll', 'touchstart', 'click', 'keydown'
+                ];
+                
+                // Debounce function to limit how often we update
+                let timeout = null;
+                const updateActivity = () => {
+                    if (timeout) {
+                        clearTimeout(timeout);
+                    }
+                    
+                    timeout = setTimeout(() => {
+                        // Only update if user is logged in (don't require firebase auth)
+                        if (localStorage.getItem('userLoggedIn') === 'true') {
+                            localStorage.setItem('sessionLastActivity', Date.now().toString());
+                        }
+                    }, 1000); // Wait 1 second after last activity before updating
+                };
+                
+                // Add event listeners for all activity events
+                activityEvents.forEach(event => {
+                    document.addEventListener(event, updateActivity, { passive: true });
+                });
+                
+                // Also set up a regular heartbeat every minute even without activity
+                setInterval(() => {
+                    if (localStorage.getItem('userLoggedIn') === 'true' && 
+                        document.visibilityState === 'visible') {
+                        localStorage.setItem('sessionLastActivity', Date.now().toString());
+                    }
+                }, 60 * 1000); // Every minute
+            }
+            
+            // Initialize Firebase
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+                    authDomain: "vexplay-33e9f.firebaseapp.com",
+                    projectId: "vexplay-33e9f",
+                storageBucket: "vexplay-33e9f.appspot.com",
+                    messagingSenderId: "797854431681",
+                    appId: "1:797854431681:web:b09b88437937b9fc551740",
+                measurementId: "G-KRWYW4Z4Y3"
+                };
+                
+                // Initialize Firebase
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+            }
+            
+            // DOM Elements
+            const loginContainer = document.getElementById('loginContainer');
+            const chatWrapper = document.getElementById('chatWrapper');
+            const chatMessages = document.getElementById('chatMessages');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+
+            // Firebase references
+            const db = firebase.firestore();
+            const auth = firebase.auth();
+            const messagesRef = db.collection('eu3_chat_messages');
+
+            // Only do a soft session check, don't forcefully redirect right away
+            // This allows users who are already logged in to stay logged in
+            if (!localStorage.getItem('userLoggedIn')) {
+                console.log("No login detected, page will redirect after auth check");
+                // The onAuthStateChanged handler will redirect if needed
+            } else {
+                // Just update timestamp for logged in users
+                localStorage.setItem('sessionLastActivity', Date.now().toString());
+            }
+
+            // Check authentication state
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // Update last activity time whenever auth state is confirmed
+                    localStorage.setItem('sessionLastActivity', Date.now().toString());
+                    localStorage.setItem('userLoggedIn', 'true');
+                    
+                    // Check if user is a guest (unregistered user)
+                    const isGuest = localStorage.getItem('isGuest') === 'true';
+                    
+                    if (isGuest) {
+                        // User is a guest, show login prompt with message about registration
+                        loginContainer.style.display = 'block';
+                        chatWrapper.style.display = 'none';
+                        
+                        // Update login container with guest-specific message
+                        const loginHeader = document.querySelector('#loginContainer h2');
+                        if (loginHeader) {
+                            loginHeader.textContent = 'Chat Requires Registration';
+                        }
+                        
+                        const loginMessage = document.querySelector('#loginContainer p');
+                        if (loginMessage) {
+                            loginMessage.innerHTML = 'You need a registered account to use the chat feature.<br>Please create a full account to continue.';
+                        }
+                        
+                        const loginButton = document.querySelector('#loginContainer .login-button');
+                        if (loginButton) {
+                            loginButton.textContent = 'Register Account';
+                            loginButton.onclick = function() {
+                                window.location.href = '/signup.html';
+                            };
+                        }
+                        
+                        return;
+                    }
+                    
+                    // User is signed in and not a guest
+                    loginContainer.style.display = 'none';
+                    chatWrapper.style.display = 'flex';
+
+                    // Get user profile data from Firestore
+                    db.collection('userProfiles').doc(user.uid).get()
+                        .then((doc) => {
+                            if (doc.exists) {
+                                const profile = doc.data();
+                                
+                                // Set display name in header - THIS IS JUST FOR DISPLAY IN THE UI
+                                let displayNameText = '';
+                                
+                                // If there's both a username and a display name, and they're different,
+                                // show both with username in parentheses
+                                if (profile.username && profile.displayName && 
+                                    profile.username.toLowerCase() !== profile.displayName.toLowerCase()) {
+                                    // Display both with username in parentheses
+                                    displayNameText = `${profile.displayName} (${profile.username})`;
+                                } else {
+                                    // Just show one of them
+                                    displayNameText = profile.displayName || profile.username || user.displayName || user.email.split('@')[0];
+                                }
+                                
+                                userName.textContent = displayNameText;
+                                
+                                // Set user avatar from Firestore
+                                if (profile.avatarUrl) {
+                                    userAvatar.innerHTML = ''; // Clear the text content
+                                    userAvatar.style.backgroundImage = `url('${profile.avatarUrl}')`;
+                                    userAvatar.style.backgroundSize = 'cover';
+                                    userAvatar.style.backgroundPosition = 'center';
+                                } else {
+                                    // Fallback to initials
+                                    userAvatar.textContent = displayNameText[0].toUpperCase();
+                                    userAvatar.style.backgroundImage = 'none';
+                                }
+                            } else {
+                                // No profile found, use defaults
+                    const displayName = user.displayName || user.email.split('@')[0];
+                    userName.textContent = displayName;
+                    userAvatar.textContent = displayName[0].toUpperCase();
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error fetching user profile:", error);
+                            // Fallback to basic info
+                            const displayName = user.displayName || user.email.split('@')[0];
+                            userName.textContent = displayName;
+                            userAvatar.textContent = displayName[0].toUpperCase();
+                        });
+
+                    // Initialize chat
+                    initializeChat(user);
+                    } else {
+                    // User is signed out
+                    loginContainer.style.display = 'block';
+                    chatWrapper.style.display = 'none';
+                }
+            });
+
+            function initializeChat(user) {
+                // Clear existing messages
+                        chatMessages.innerHTML = '';
+                        
+                // Load messages
+                messagesRef
+                    .orderBy('timestamp', 'desc')
+                    .limit(50)
+                    .onSnapshot((snapshot) => {
+                        chatMessages.innerHTML = '';
+                        
+                        // Get all messages with a real timestamp
+                            const messages = [];
+                        snapshot.forEach((doc) => {
+                            const data = doc.data();
+                            if (data.timestamp && typeof data.timestamp.toDate === 'function') {
+                                messages.push({
+                                    id: doc.id,
+                                    ...data
+                                });
+                            }
+                        });
+
+                        // Sort messages by timestamp (oldest first)
+                        messages.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
+
+                        // Display messages
+                        messages.forEach((message) => {
+                            displayMessage(message, user.uid);
+                    });
+                });
+                
+                // Set up message sending
+                sendButton.onclick = () => {
+                    const messageText = messageInput.value.trim();
+                    console.log('Send button clicked, message:', messageText);
+                    if (messageText) {
+                        sendButton.disabled = true;
+                        sendMessage(user, messageText).finally(() => {
+                            sendButton.disabled = false;
+                        });
+                    }
+                };
+
+                messageInput.onkeypress = (e) => {
+                    if (e.key === 'Enter') {
+                        const messageText = messageInput.value.trim();
+                        console.log('Enter pressed, message:', messageText);
+                        if (messageText) {
+                            sendButton.disabled = true;
+                            sendMessage(user, messageText).finally(() => {
+                                sendButton.disabled = false;
+                            });
+                        }
+                    }
+                };
+            }
+
+            let replyTo = null;
+            const replyPreview = document.getElementById('replyPreview');
+
+            function showReplyPreview(message) {
+                replyTo = {
+                    id: message.id,
+                    sender: message.sender,
+                    text: message.text.length > 60 ? message.text.slice(0, 60) + '…' : message.text
+                };
+                replyPreview.innerHTML = `<div class='reply-preview'>Replying to <b>${escapeHTML(replyTo.sender)}</b>: <span>${escapeHTML(replyTo.text)}</span><button class='reply-cancel' title='Cancel reply'>&times;</button></div>`;
+                replyPreview.style.display = '';
+                document.querySelector('.reply-cancel').onclick = () => {
+                    replyTo = null;
+                    replyPreview.style.display = 'none';
+                };
+            }
+
+            function escapeHTML(str) {
+                return str.replace(/[&<>"']/g, function(tag) {
+                    const charsToReplace = {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;'
+                    };
+                    return charsToReplace[tag] || tag;
+                });
+            }
+
+            // Function to apply Markdown-style formatting
+            function formatText(text) {
+                if (!text) return '';
+                
+                // First escape HTML to prevent injection
+                let formattedText = escapeHTML(text);
+                
+                // Handle line breaks - convert \n to <br>
+                formattedText = formattedText.replace(/\n/g, '<br>');
+                
+                // Bold: *text* or **text**
+                formattedText = formattedText.replace(/\*\*(.*?)\*\*|\*(.*?)\*/g, function(match, p1, p2) {
+                    return `<strong>${p1 || p2}</strong>`;
+                });
+                
+                // Italics: _text_ or __text__
+                formattedText = formattedText.replace(/__(.*?)__|\_(.*?)\_/g, function(match, p1, p2) {
+                    return `<em>${p1 || p2}</em>`;
+                });
+                
+                // Underline: ~text~
+                formattedText = formattedText.replace(/\~(.*?)\~/g, '<u>$1</u>');
+                
+                // Strikethrough: ~~text~~
+                formattedText = formattedText.replace(/\~\~(.*?)\~\~/g, '<del>$1</del>');
+                
+                // Code: `text`
+                formattedText = formattedText.replace(/\`(.*?)\`/g, '<code>$1</code>');
+                
+                return formattedText;
+            }
+
+            // Profanity filter function using PurgoMalum API
+            async function filterProfanity(text, isUsername = false) {
+                try {
+                    // Skip filtering empty text or URLs/image links
+                    if (!text || text.trim() === '' || text.startsWith('http')) {
+                        return text;
+                    }
+
+                    // Use different replacement text based on content type
+                    const fillText = isUsername ? 'cool' : '###';
+                    
+                    const response = await fetch(`https://www.purgomalum.com/service/json?text=${encodeURIComponent(text)}&fill_text=${fillText}`);
+                    const data = await response.json();
+                    
+                    // If the API returned a result
+                    if (data && data.result) {
+                        console.log(`Profanity filter processed: "${text}" → "${data.result}"`);
+                        return data.result;
+                    } else {
+                        console.warn("PurgoMalum API returned no result, using original text");
+                        return text;
+                    }
+                } catch (error) {
+                    console.error("Error using profanity filter:", error);
+                    // Fallback to original text if the API fails
+                    return text;
+                }
+            }
+
+            function displayMessage(message, currentUserId) {
+                // Skip if message element already exists
+                const messageId = `msg-${message.id}`;
+                if (document.getElementById(messageId)) return;
+
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                messageElement.classList.add(message.senderId === currentUserId ? 'sent' : 'received');
+                if (message.isAI) {
+                    messageElement.classList.add('ai-message');
+                }
+                messageElement.id = messageId;
+
+                // --- Reply context (if this message is a reply) ---
+                if (message.replyTo) {
+                    const replyContext = document.createElement('div');
+                    replyContext.className = 'reply-context';
+                    replyContext.innerHTML = `<b>${escapeHTML(message.replyTo.sender)}</b>: <span>${formatText(message.replyTo.text)}</span>`;
+                    messageElement.appendChild(replyContext);
+                }
+
+                const senderElement = document.createElement('div');
+                senderElement.classList.add('sender');
+                senderElement.textContent = message.sender; // Username already filtered when sent
+                if (message.isAI) {
+                    senderElement.classList.add('ai-sender');
+                }
+
+                // If message contains image/gif links, show them below the text
+                const imageLinks = extractImageLinks(message.text);
+                // Remove image links from the text before linkifying
+                const textWithoutImages = removeImageLinks(message.text, imageLinks);
+                // Message text with clickable links, but image links are hidden
+                const textElement = document.createElement('div');
+                
+                // Apply text formatting and then linkify
+                let formattedText = formatText(textWithoutImages);
+                textElement.innerHTML = linkify(formattedText);
+                
+                imageLinks.forEach(link => {
+                    const img = document.createElement('img');
+                    img.src = link;
+                    img.alt = 'image';
+                    img.style.maxWidth = '220px';
+                    img.style.maxHeight = '160px';
+                    img.style.display = 'block';
+                    img.style.marginTop = '7px';
+                    img.style.borderRadius = '10px';
+                    img.onerror = function() { img.style.display = 'none'; };
+                    textElement.appendChild(img);
+                });
+
+                const timeElement = document.createElement('div');
+                timeElement.classList.add('time');
+                timeElement.textContent = message.timestamp ? new Date(message.timestamp.toDate()).toLocaleTimeString() : '';
+
+                // --- Message actions (reply/delete) ---
+                const actions = document.createElement('div');
+                actions.className = 'message-actions';
+
+                // --- Reply button ---
+                const replyBtn = document.createElement('button');
+                replyBtn.className = 'reply-btn';
+                replyBtn.title = 'Reply';
+                replyBtn.innerHTML = '&#8617;';
+                replyBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    showReplyPreview(message);
+                };
+                actions.appendChild(replyBtn);
+
+                // --- Report button (don't show for AI messages or user's own messages) ---
+                if (!message.isAI && message.senderId !== currentUserId) {
+                    const reportBtn = document.createElement('button');
+                    reportBtn.className = 'report-btn';
+                    reportBtn.title = 'Report message';
+                    reportBtn.innerHTML = '&#9888;'; // warning/alert triangle
+                    reportBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        showReportDialog(message);
+                    };
+                    actions.appendChild(reportBtn);
+                }
+
+                // --- Delete button (only for sender) ---
+                if (message.senderId === currentUserId) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.title = 'Delete message';
+                    deleteBtn.innerHTML = '&#128465;';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (confirm('Delete this message?')) {
+                            messagesRef.doc(message.id).delete().catch(err => {
+                                alert('Failed to delete message: ' + err.message);
+                            });
+                        }
+                    };
+                    actions.appendChild(deleteBtn);
+                }
+
+                messageElement.appendChild(actions);
+                messageElement.appendChild(senderElement);
+                messageElement.appendChild(textElement);
+                messageElement.appendChild(timeElement);
+
+                // Add message to the chat
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            async function sendMessage(user, messageText) {
+                if (!messageText) return Promise.resolve();
+
+                try {
+                    // Check if the message is a VexAI command
+                    if (messageText.startsWith('/vexai ')) {
+                        const question = messageText.substring(7).trim();
+                        if (question) {
+                            // Show loading state
+                            showToast('Asking Vex AI...', 'info');
+                            
+                            try {
+                                // Send the original message showing what the user asked
+                                const originalMessage = {
+                    text: messageText,
+                    sender: user.displayName || user.email.split('@')[0],
+                    senderId: user.uid,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                                await messagesRef.add(originalMessage);
+                                
+                                // Get AI response from OpenRouter API
+                                const aiResponse = await queryVexAI(question);
+                                
+                                // Create AI response message
+                                const aiMessage = {
+                                    text: aiResponse,
+                                    sender: "Vex AI",
+                                    senderId: "vex-ai-assistant",
+                                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                                    isAI: true,
+                                    originalQuestion: question, // Store the original question for reference
+                                    responseToUser: user.uid // Track which user asked the question
+                                };
+                                
+                                // Add AI message to the chat
+                                await messagesRef.add(aiMessage);
+                                showToast('Vex AI responded', 'success');
+                            } catch (error) {
+                                console.error("Error getting AI response:", error);
+                                showToast('Failed to get AI response', 'error');
+                            }
+                            
+                            // Clear input and return
+                            messageInput.value = '';
+                            return Promise.resolve();
+                        }
+                    }
+                    
+                    // Regular message flow continues below
+                    // Filter the message text for profanity (NOT username)
+                    const filteredMessageText = await filterProfanity(messageText, false);
+                    
+                    // Retrieve the user's profile from Firestore
+                    const doc = await db.collection('userProfiles').doc(user.uid).get();
+                    
+                    // First try to get the username (fixed identifier) from the profile
+                    // Only fall back to displayName if username is not available
+                    let senderName;
+                    if (doc.exists) {
+                        const profile = doc.data();
+                        // Check if profile has username field (fixed identifier)
+                        if (profile.username) {
+                            // Get first letter capitalized for display
+                            senderName = profile.username.charAt(0).toUpperCase() + profile.username.slice(1);
+                        } else {
+                            // Fall back to display name
+                            senderName = profile.displayName || user.displayName || user.email.split('@')[0];
+                        }
+                    } else {
+                        senderName = user.displayName || user.email.split('@')[0];
+                    }
+                    
+                    // Filter the username for profanity (with special handling for usernames)
+                    const filteredUsername = await filterProfanity(senderName, true);
+                    
+                    const message = {
+                        text: filteredMessageText,
+                        sender: filteredUsername,
+                        senderId: user.uid,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                if (replyTo) {
+                        // Filter reply text as chat, but sender name as username
+                        const filteredReplyText = await filterProfanity(replyTo.text, false);
+                        const filteredReplySender = await filterProfanity(replyTo.sender, true);
+                        
+                        message.replyTo = {
+                            ...replyTo,
+                            text: filteredReplyText,
+                            sender: filteredReplySender
+                        };
+                }
+
+                // Add message to Firestore
+                    await messagesRef.add(message);
+                    
+                    // Clear input and replyTo
+                        messageInput.value = '';
+                        replyTo = null;
+                        replyPreview.style.display = 'none';
+                        console.log("Message sent successfully");
+                    
+                    return Promise.resolve();
+                } catch (error) {
+                        console.error("Error sending message:", error);
+                        alert("Failed to send message. Please try again.\n" + error.message);
+                    return Promise.reject(error);
+                }
+            }
+            
+            // Function to query VexAI using OpenRouter API
+            async function queryVexAI(question) {
+                try {
+                    const openRouterKey = "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";
+                    const model = "google/gemini-2.0-flash-exp:free";
+                    
+                    // Get recent chat messages for context (last 15 messages)
+                    const recentMessages = await messagesRef
+                        .orderBy('timestamp', 'desc')
+                        .limit(15)
+                        .get();
+                    
+                    // Format messages for context, oldest first
+                    const chatHistory = [];
+                    const docArray = recentMessages.docs.reverse();
+                    
+                    for (let i = 0; i < docArray.length; i++) {
+                        const msgData = docArray[i].data();
+                        if (!msgData.text || !msgData.sender) continue;
+                        
+                        if (msgData.isAI) {
+                            // This is an AI response, format it as an assistant message
+                            chatHistory.push({
+                                role: "assistant",
+                                content: msgData.text
+                            });
+                        } else {
+                            // For user messages, check if it's an AI command
+                            if (msgData.text.startsWith('/vexai ')) {
+                                // Extract just the question part
+                                const userQuestion = msgData.text.substring(7).trim();
+                                chatHistory.push({
+                                    role: "user",
+                                    content: userQuestion
+                                });
+                            } else {
+                                // Regular user message with sender name
+                                chatHistory.push({
+                                    role: "user",
+                                    content: `${msgData.sender}: ${msgData.text}`
+                                });
+                            }
+                        }
+                    }
+                    
+                    // Start with system message
+                    const messages = [
+                        {
+                            role: "system",
+                            content: "You are Vex AI, a helpful assistant for the Vexplay game website. Keep answers brief, friendly, and suitable for all ages. If you don't know something, say so honestly. You can answer questions about games, coding, math, science, and other topics. Your responses should be helpful and conversational but concise. You have access to previous messages in the chat for context so you can refer to past conversations when relevant."
+                        }
+                    ];
+                    
+                    // Add chat history for context
+                    messages.push(...chatHistory);
+                    
+                    // Add the current question
+                    messages.push({
+                        role: "user",
+                        content: question
+                    });
+                    
+                    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${openRouterKey}`,
+                            'HTTP-Referer': window.location.href,
+                            'X-Title': 'Vexplay Chat'
+                        },
+                        body: JSON.stringify({
+                            model: model,
+                            messages: messages,
+                            max_tokens: 600
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`API Error: ${errorData.error?.message || response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    return data.choices[0].message.content.trim();
+                } catch (error) {
+                    console.error("Failed to get AI response:", error);
+                    return "Sorry, I couldn't process your request right now. Please try again later.";
+                }
+            }
+
+            function insertMedia(url) {
+                console.log("insertMedia called with url:", url);
+                console.log("Current media type:", currentMediaType);
+                
+                // If it's a GIF (from Giphy), send immediately
+                if (url.includes('.gif') || currentMediaType === 'giphy') {
+                    // Close the search dialog first
+                    closeMediaSearch();
+                    
+                    // Show sending feedback
+                    showToast('Sending GIF...', 'info');
+                    
+                    // Using the regular sending function
+                    sendGifDirectly(url);
+                                            } else {
+                    // For regular images, just insert into the input field
+                    messageInput.value += ' ' + url + ' ';
+                    messageInput.focus();
+                    closeMediaSearch();
+                }
+            }
+
+            function linkify(text) {
+                // Make URLs clickable
+                const urlPattern = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
+                return text.replace(urlPattern, function(url) {
+                    let href = url;
+                    if (!href.match(/^https?:\/\//)) href = 'http://' + href;
+                    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+                });
+            }
+
+            function extractImageLinks(text) {
+                // Find all image/gif links, including all common formats with query parameters
+                const imgPattern = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}\/[^\s]*\.(?:png|jpg|jpeg|gif|webp|bmp|tiff|avif|heic)(\?[^\s]*)?)/gi;
+                return text.match(imgPattern) || [];
+            }
+
+            function removeImageLinks(text, imageLinks) {
+                let lines = text.split(/\r?\n/);
+                // Remove lines that are just an image link (with or without whitespace)
+                lines = lines.filter(line => {
+                    const trimmed = line.trim();
+                    return !imageLinks.some(link => trimmed === link);
+                });
+                let result = lines.join('\n');
+                // Remove image links that are part of a sentence
+                imageLinks.forEach(link => {
+                    result = result.split(link).join('');
+                });
+                return result;
+            }
+
+            // Media search functionality
+            let currentMediaType = '';
+            let mediaSearchDialog;
+            let mediaDialogTitle;
+            let mediaSearchInput;
+            let mediaResults;
+            let mediaOptions;
+
+            // Initialize the media variables after DOM is loaded
+            document.addEventListener('DOMContentLoaded', () => {
+                // Set up the global variables
+                mediaSearchDialog = document.getElementById('mediaSearchDialog');
+                mediaDialogTitle = document.getElementById('mediaDialogTitle');
+                mediaSearchInput = document.getElementById('mediaSearchInput');
+                mediaResults = document.getElementById('mediaResults');
+                mediaOptions = document.getElementById('mediaOptions');
+                
+                applyStoredTheme();
+                
+                // Setup session activity tracking
+                setupActivityHeartbeat();
+                
+                // Initialize EmailJS immediately
+                if (typeof emailjs !== 'undefined') {
+                    initEmailJS();
+                }
+                
+                // Initialize media options
+                if (mediaOptions) {
+                    console.log("Initializing media options");
+                    mediaOptions.style.display = 'none';
+                    
+                    // Ensure media button is properly set up
+                    const mediaButton = document.querySelector('.media-button');
+                    if (mediaButton) {
+                        console.log("Setting up media button");
+                        mediaButton.addEventListener('click', function(e) {
+                            console.log("Media button clicked via event listener");
+                            toggleMediaOptions(e);
+                        });
+                    }
+                }
+                
+                if (mediaSearchDialog) {
+                    mediaSearchDialog.style.display = 'none';
+                }
+                
+                // Add search button click event for the media search
+                const searchButton = document.querySelector('.media-search-button');
+                if (searchButton) {
+                    searchButton.onclick = searchMedia;
+                }
+                
+                // Add event listener for the media search input
+                if (mediaSearchInput) {
+                    mediaSearchInput.addEventListener('keyup', function(event) {
+                        if (event.key === 'Enter') {
+                            searchMedia();
+                        }
+                    });
+                }
+                
+                // Add chat input focus listener to show AI help tooltip
+                if (messageInput) {
+                    // Create the AI help tooltip element
+                    const aiHelpElement = document.createElement('div');
+                    aiHelpElement.className = 'ai-command-help';
+                    aiHelpElement.innerHTML = 'Type <kbd>/vexai</kbd> followed by your question to ask Vex AI. The AI remembers previous messages for context.';
+                    document.querySelector('.chat-wrapper').appendChild(aiHelpElement);
+                    
+                    // Show tooltip when user is typing
+                    messageInput.addEventListener('focus', function() {
+                        aiHelpElement.classList.add('show');
+                        // Hide tooltip after 5 seconds
+                        setTimeout(() => {
+                            aiHelpElement.classList.remove('show');
+                        }, 5000);
+                    });
+                }
+                
+                // Set up periodic session validation (every 5 minutes)
+                setInterval(() => {
+                    if (!checkSessionValid()) {
+                        console.log("Session expired during active use");
+                        showToast("Your session has expired. Please log in again.", "error");
+                        
+                        // Delay redirect to allow user to see the toast
+                        setTimeout(() => {
+                            window.location.href = '/login.html?redirect=chat.html&expired=true';
+                        }, 2000);
+                    }
+                }, 5 * 60 * 1000); // Check every 5 minutes
+                
+                // Check URL parameters for login redirect
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('loginsuccess') === 'true') {
+                    showToast("Login successful! Welcome to chat.", "success");
+                }
+            });
+
+            function toggleMediaOptions(event) {
+                console.log("+ button clicked!");
+                
+                // EMERGENCY FIX: Force create a visible menu that works
+                // Create an absolutely positioned menu right at the cursor position
+                const x = event.clientX || window.innerWidth / 2;
+                const y = event.clientY || window.innerHeight / 2;
+                
+                // Remove any existing dynamic menu
+                if (document.querySelector('.emergency-media-menu')) {
+                    document.querySelector('.emergency-media-menu').remove();
+                    return;
+                }
+                
+                // Create a very basic, guaranteed-visible emergency menu
+                const emergencyMenu = document.createElement('div');
+                emergencyMenu.className = 'emergency-media-menu';
+                emergencyMenu.style.position = 'fixed';
+                emergencyMenu.style.top = (y - 100) + 'px';
+                emergencyMenu.style.left = x + 'px';
+                emergencyMenu.style.width = '180px';
+                emergencyMenu.style.background = '#333';
+                emergencyMenu.style.border = '2px solid #4a90e2';
+                emergencyMenu.style.borderRadius = '8px';
+                emergencyMenu.style.zIndex = '99999';
+                emergencyMenu.style.boxShadow = '0 0 20px rgba(0,0,0,0.5)';
+                
+                // Add GIF search button
+                const gifButton = document.createElement('button');
+                gifButton.textContent = '🎬 Search GIFs';
+                gifButton.style.width = '100%';
+                gifButton.style.padding = '12px';
+                gifButton.style.background = '#444';
+                gifButton.style.color = 'white';
+                gifButton.style.border = 'none';
+                gifButton.style.borderBottom = '1px solid #666';
+                gifButton.style.cursor = 'pointer';
+                gifButton.style.fontSize = '15px';
+                gifButton.onclick = function() {
+                    document.querySelector('.emergency-media-menu').remove();
+                    showMediaSearch('giphy');
+                };
+                
+                // Add Image search button
+                const imgButton = document.createElement('button');
+                imgButton.textContent = '🖼️ Search Images';
+                imgButton.style.width = '100%';
+                imgButton.style.padding = '12px';
+                imgButton.style.background = '#444';
+                imgButton.style.color = 'white';
+                imgButton.style.border = 'none';
+                imgButton.style.cursor = 'pointer';
+                imgButton.style.fontSize = '15px';
+                imgButton.onclick = function() {
+                    document.querySelector('.emergency-media-menu').remove();
+                    showMediaSearch('imgur');
+                };
+                
+                // Add buttons to menu
+                emergencyMenu.appendChild(gifButton);
+                emergencyMenu.appendChild(imgButton);
+                
+                // Add to document body (not container - directly to body)
+                document.body.appendChild(emergencyMenu);
+                
+                // Stop propagation and prevent default
+                if (event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                }
+                return false;
+            }
+
+            // Hide dynamic media options when clicking elsewhere
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.media-button-container') && !event.target.closest('.emergency-media-menu')) {
+                    if (document.querySelector('.emergency-media-menu')) {
+                        document.querySelector('.emergency-media-menu').remove();
+                    }
+                }
+            });
+
+            function showMediaSearch(type) {
+                // Hide emergency menu if it exists
+                if (document.querySelector('.emergency-media-menu')) {
+                    document.querySelector('.emergency-media-menu').remove();
+                }
+                
+                currentMediaType = type;
+                if (type === 'giphy') {
+                    mediaDialogTitle.textContent = 'Search GIFs';
+                    mediaSearchInput.placeholder = 'Search Giphy...';
+                } else {
+                    mediaDialogTitle.textContent = 'Search Images';
+                    mediaSearchInput.placeholder = 'Search Imgur...';
+                }
+                mediaSearchDialog.style.display = 'flex';
+                mediaSearchInput.focus();
+                mediaResults.innerHTML = '<div style="color:#999;text-align:center;grid-column:1/-1;padding:20px;">Type to search...</div>';
+                
+                // Ensure search button works
+                const searchButton = document.querySelector('.media-search-button');
+                if (searchButton) {
+                    searchButton.onclick = searchMedia;
+                }
+            }
+
+            function closeMediaSearch() {
+                mediaSearchDialog.style.display = 'none';
+                mediaSearchInput.value = '';
+                mediaResults.innerHTML = '';
+            }
+
+            function searchMedia() {
+                const query = mediaSearchInput.value.trim();
+                if (!query) return;
+                
+                mediaResults.innerHTML = '<div style="color:#999;text-align:center;grid-column:1/-1;padding:20px;">Searching...</div>';
+                
+                if (currentMediaType === 'giphy') {
+                    // Use Giphy API with the provided key
+                    const giphyApiKey = "zCJT52taMna6VXa6JHXnjsgbNsWRakd0";
+                    
+                    fetch(`https://api.giphy.com/v1/gifs/search?api_key=${giphyApiKey}&q=${query}&limit=8&rating=pg-13`)
+                        .then(response => response.json())
+                .then(data => {
+                            if (data.data && data.data.length > 0) {
+                                const gifResults = data.data.map(item => ({
+                                    url: item.images.fixed_height.url,
+                                    thumbnail: item.images.fixed_height_small.url,
+                                    credit: 'Via GIPHY'
+                                }));
+                                displayMediaResults(gifResults);
+                                
+                                // Add attribution
+                                mediaResults.innerHTML += `<div style="color:#999;text-align:center;grid-column:1/-1;padding:10px;font-size:0.8em;margin-top:10px;">
+                                    Powered by <a href="https://giphy.com" target="_blank" style="color:#aaa;">GIPHY</a>
+                                </div>`;
+                            } else {
+                                mediaResults.innerHTML = '<div style="color:#999;text-align:center;grid-column:1/-1;padding:20px;">No GIFs found</div>';
+                    }
+                })
+                .catch(error => {
+                            console.error('Error fetching from Giphy:', error);
+                            mediaResults.innerHTML = `<div style="color:#ff6b6b;text-align:center;grid-column:1/-1;padding:20px;">Error: ${error.message}</div>`;
+                            
+                            // Fallback to placeholder GIFs if API fails
+                            const fallbackResults = [];
+                            const terms = ['cat', 'dog', 'funny', 'laugh', 'cool', 'wow', 'amazing', 'smile'];
+                            let matchedTerm = 'cat';
+                            for (const term of terms) {
+                                if (query.toLowerCase().includes(term)) {
+                                    matchedTerm = term;
+                                    break;
+                                }
+                            }
+                            
+                            for (let i = 1; i <= 8; i++) {
+                                fallbackResults.push({
+                                    url: `https://via.placeholder.com/200x150?text=${matchedTerm}+${i}`,
+                                    thumbnail: `https://via.placeholder.com/100x75?text=${matchedTerm}+${i}`
+                                });
+                            }
+                            
+                            displayMediaResults(fallbackResults);
+                            mediaResults.innerHTML += `<div style="color:#999;text-align:center;grid-column:1/-1;padding:10px;font-size:0.8em;margin-top:10px;">
+                                Using placeholder GIFs due to API error
+                            </div>`;
+                        });
+                    } else {
+                    // Use Unsplash free API for image search
+                    const accessKey = 'WHl3H_MJ3Z9TEVwvCxJyGKOvVrPbLsGckZoU-HVCnGc';
+                    
+                    fetch(`https://api.unsplash.com/search/photos?query=${query}&per_page=8&client_id=${accessKey}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.results && data.results.length > 0) {
+                                const searchResults = data.results.map(item => ({
+                                    url: item.urls.regular,
+                                    thumbnail: item.urls.thumb,
+                                    credit: `Photo by ${item.user.name} on Unsplash`
+                                }));
+                                displayMediaResults(searchResults);
+                                
+                                // Add attribution as required by Unsplash
+                                mediaResults.innerHTML += `<div style="color:#999;text-align:center;grid-column:1/-1;padding:10px;font-size:0.8em;margin-top:10px;">
+                                    Images powered by <a href="https://unsplash.com" target="_blank" style="color:#aaa;">Unsplash</a>
+                                </div>`;
+                            } else {
+                                mediaResults.innerHTML = '<div style="color:#999;text-align:center;grid-column:1/-1;padding:20px;">No results found</div>';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching from Unsplash:', error);
+                            mediaResults.innerHTML = `<div style="color:#ff6b6b;text-align:center;grid-column:1/-1;padding:20px;">Error: ${error.message}</div>`;
+                        });
+                }
+            }
+
+            function displayMediaResults(results) {
+                if (results.length === 0) {
+                    mediaResults.innerHTML = '<div style="color:#999;text-align:center;grid-column:1/-1;padding:20px;">No results found</div>';
+                        return;
+                    }
+                    
+                mediaResults.innerHTML = '';
+                
+                // Add header info about auto-sending for GIFs
+                if (currentMediaType === 'giphy') {
+                    const infoElement = document.createElement('div');
+                    infoElement.style.gridColumn = '1/-1';
+                    infoElement.style.padding = '5px 10px';
+                    infoElement.style.marginBottom = '10px';
+                    infoElement.style.background = 'rgba(74, 144, 226, 0.2)';
+                    infoElement.style.borderRadius = '5px';
+                    infoElement.style.color = '#ccc';
+                    infoElement.style.fontSize = '12px';
+                    infoElement.style.textAlign = 'center';
+                    infoElement.innerHTML = '✨ Click a GIF to send it immediately ✨';
+                    mediaResults.appendChild(infoElement);
+                }
+                
+                results.forEach((item, index) => {
+                    const mediaItem = document.createElement('div');
+                    mediaItem.className = 'media-item';
+                    mediaItem.dataset.index = index;
+                    mediaItem.dataset.url = item.url;
+                    
+                    // Add a special indicator for items that will auto-send (GIFs)
+                    if (currentMediaType === 'giphy' || item.url.includes('.gif')) {
+                        mediaItem.classList.add('auto-send-item');
+                        
+                        // Add a small indicator icon to show it will auto-send
+                        const indicator = document.createElement('div');
+                        indicator.className = 'auto-send-indicator';
+                        indicator.innerHTML = '⚡';
+                        indicator.title = 'Click to send immediately';
+                        mediaItem.appendChild(indicator);
+                    }
+                    
+                    const img = document.createElement('img');
+                    img.src = item.thumbnail || item.url;
+                    img.alt = 'Media result';
+                    img.onerror = function() {
+                        // If image fails to load, show a placeholder with error message
+                        this.src = 'https://via.placeholder.com/150x100?text=Error+Loading';
+                    };
+                    
+                    mediaItem.appendChild(img);
+                    
+                    // Add credit if available (for Unsplash)
+                    if (item.credit) {
+                        const creditDiv = document.createElement('div');
+                        creditDiv.className = 'media-credit';
+                        creditDiv.textContent = item.credit;
+                        mediaItem.appendChild(creditDiv);
+                    }
+                    
+                    // Use separate event handlers for better reliability
+                    mediaItem.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const url = this.dataset.url;
+                        console.log("Media item clicked:", url);
+                        insertMedia(url);
+                        return false;
+                    });
+                    
+                    // Add the media item to results
+                    mediaResults.appendChild(mediaItem);
+                });
+            }
+
+            function showToast(message, type = 'info') {
+                const toast = document.getElementById('toast');
+                if (!toast) return;
+                
+                // Clear any existing timeouts
+                if (toast.timeoutId) {
+                    clearTimeout(toast.timeoutId);
+                }
+                
+                // Set toast message and type
+                toast.textContent = message;
+                toast.className = 'toast-notification';
+                toast.classList.add(type);
+                toast.classList.add('show');
+                
+                // Hide toast after 3 seconds
+                toast.timeoutId = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            // New direct send function that uses the existing code path
+            function sendGifDirectly(url) {
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    showToast('Not logged in, GIF added to input', 'error');
+                    messageInput.value = url;
+                    messageInput.focus();
+                    return;
+                }
+                
+                // Use the regular send message function which we know works
+                sendButton.disabled = true;
+                
+                sendMessage(user, url)
+                    .then(() => {
+                        showToast('GIF sent!', 'info');
+                        sendButton.disabled = false;
+                    })
+                    .catch((error) => {
+                        console.error("Error sending GIF:", error);
+                        showToast('Failed to send GIF: ' + error.message, 'error');
+                        messageInput.value = url;
+                        messageInput.focus();
+                        sendButton.disabled = false;
+                    });
+            }
+
+            // Variables to store the message being reported
+            let reportedMessage = null;
+
+            // Function to show the report dialog
+            function showReportDialog(message) {
+                reportedMessage = message;
+                
+                // Update the message preview - properly escape HTML and format text/links
+                const previewElement = document.getElementById('reportMessagePreview');
+                const senderText = escapeHTML(message.sender) + ': ';
+                
+                // Process text to handle long URLs better
+                let messageText = escapeHTML(message.text);
+                // Truncate very long URLs for display purposes
+                messageText = messageText.replace(/(https?:\/\/[^\s]{30,})[^\s]*/g, '$1...');
+                
+                // Display the content
+                previewElement.innerHTML = `<strong>${senderText}</strong>${messageText}`;
+                
+                // Clear previous form values
+                document.getElementById('reportReason').value = '';
+                document.getElementById('reportNotes').value = '';
+                
+                // Show the dialog with animation
+                const reportDialog = document.getElementById('reportDialog');
+                reportDialog.style.display = 'flex';
+                reportDialog.style.opacity = '0';
+                setTimeout(() => {
+                    reportDialog.style.opacity = '1';
+                }, 10);
+            }
+
+            // Function to close the report dialog
+            function closeReportDialog() {
+                const reportDialog = document.getElementById('reportDialog');
+                reportDialog.style.opacity = '0';
+                
+                // Wait for animation to complete before hiding
+                setTimeout(() => {
+                    reportDialog.style.display = 'none';
+                    reportedMessage = null;
+                }, 300);
+            }
+
+            // Initialize EmailJS
+            function initEmailJS() {
+                // Check if emailjs is available
+                if (typeof emailjs === 'undefined') {
+                    console.error("EmailJS SDK not loaded or not available");
+                    return;
+                }
+                
+                try {
+                    // Use the correct public key
+                    emailjs.init("NvMiIo9l4kVIg9-Dd");
+                    console.log("EmailJS initialized successfully");
+                } catch (error) {
+                    console.error("Failed to initialize EmailJS:", error);
+                }
+            }
+
+            // Function to submit the report
+            async function submitReport() {
+                if (!reportedMessage) {
+                    showToast('Error: No message selected for reporting', 'error');
+                    return;
+                }
+                
+                const reason = document.getElementById('reportReason').value;
+                if (!reason) {
+                    showToast('Please select a reason for reporting', 'error');
+                    return;
+                }
+                
+                const notes = document.getElementById('reportNotes').value;
+                
+                // Disable submit button to prevent multiple submissions
+                const submitButton = document.querySelector('.report-submit');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Submitting...';
+                
+                try {
+                    // Show loading toast
+                    showToast('Submitting report...', 'info');
+                    
+                    // Get current user details
+                    const user = firebase.auth().currentUser;
+                    if (!user) {
+                        showToast('You must be logged in to report messages', 'error');
+                        closeReportDialog();
+                        return;
+                    }
+                    
+                    // Get user profile for more details
+                    const userProfileDoc = await db.collection('userProfiles').doc(user.uid).get();
+                    const userProfile = userProfileDoc.exists ? userProfileDoc.data() : {};
+                    
+                    // 1. Store in user's profile (always works with permissions)
+                    
+                    // Create a reports array if it doesn't exist
+                    if (!userProfile.reports) {
+                        userProfile.reports = [];
+                    }
+                    
+                    // Create a timestamp string
+                    const timestamp = new Date().toISOString();
+                    
+                    // Add the new report to the user's reports array
+                    userProfile.reports.push({
+                        messageId: reportedMessage.id || "unknown",
+                        messageText: reportedMessage.text || "No content",
+                        messageSender: reportedMessage.sender || "Unknown sender",
+                        messageSenderId: reportedMessage.senderId || "unknown",
+                        reason: reason,
+                        notes: notes || "No additional notes",
+                        timestamp: timestamp,
+                        status: "new"
+                    });
+                    
+                    // Update the user's profile with the new report
+                    await db.collection('userProfiles').doc(user.uid).update({
+                        reports: userProfile.reports
+                    });
+                    console.log("Report saved to user profile");
+                    
+                    // 2. Try to send an email notification
+                    let emailSent = false;
+                    
+                    try {
+                        if (typeof emailjs !== 'undefined') {
+                            // Prepare email parameters using the correct service & template IDs
+                            const emailParams = {
+                                to_email: "ggeznoobgetrekt@gmail.com", // Safe to include as it's visible in the code
+                                report_reason: reason,
+                                report_message_id: reportedMessage.id || "unknown",
+                                report_message_content: reportedMessage.text || "No content",
+                                report_message_sender: reportedMessage.sender || "Unknown sender",
+                                report_message_sender_id: reportedMessage.senderId || "unknown",
+                                reporter_id: user.uid,
+                                reporter_name: userProfile.displayName || userProfile.username || user.displayName || user.email || "Unknown user",
+                                additional_notes: notes || 'No additional notes provided',
+                                timestamp: timestamp
+                            };
+                            
+                            // Use the correct service ID and template ID
+                            const serviceID = "service_czbtz2r";
+                            const templateID = "template_29mkmzf";
+                            
+                            console.log("Sending email notification with EmailJS");
+                            
+                            // Send the email
+                            const response = await emailjs.send(serviceID, templateID, emailParams);
+                            console.log("EmailJS Response:", response);
+                            
+                            if (response && response.status === 200) {
+                                emailSent = true;
+                                console.log("Email notification sent successfully");
+                            }
+                        }
+                    } catch (emailError) {
+                        console.error("Failed to send email notification:", emailError);
+                        // Don't throw error, we'll still consider the report submitted
+                        // since we saved it to the user's profile
+                    }
+                    
+                    // Success notification
+                    if (emailSent) {
+                        showToast('Report submitted and admin notified. Thank you for helping keep our community safe.', 'success');
+                    } else {
+                        showToast('Report submitted successfully. Thank you for helping keep our community safe.', 'success');
+                    }
+                    
+                    closeReportDialog();
+                    
+                } catch (error) {
+                    console.error('Error submitting report:', error);
+                    showToast(`Failed to submit report: ${error.message || 'Permission denied'}`, 'error');
+                } finally {
+                    // Re-enable submit button
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Submit Report';
+                }
+            }
+        </script>
+    </body>
+</html> 

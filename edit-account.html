@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Vercel Analytics and Speed Insights -->
+        <script defer src="/_vercel/insights/script.js"></script>
+        <script defer src="/_vercel/speed-insights/script.js"></script>
+        
+        <script async src="https://www.googletagmanager.com/gtag/js?id=GTM-NX2QKP76"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-7FN7LEVWXD');
+        </script>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="/images/ico.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/storage/css/index.css">
+        <title>Edit Account | Vexplay</title>
+
+        <meta name="description" content="Edit your Vexplay account profile">
+        <meta property="og:site_name" content="Vexplay">
+        <meta property="og:title" content="Edit Vexplay Account">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="Edit your Vexplay account profile">
+        
+        <style>
+            body {
+                min-height: 100vh;
+                margin: 0;
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+                overflow-x: hidden;
+            }
+            
+            .content-side {
+                min-height: 100vh;
+                justify-content: flex-start;
+                padding-top: 20px;
+                padding-bottom: 20px;
+                box-sizing: border-box;
+                position: relative;
+            }
+            
+            .edit-account-container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 3px solid var(--border-color2);
+                border-radius: 16px;
+                background-color: var(--background-color);
+            }
+            
+            .edit-header {
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid var(--border-color2);
+                text-align: center;
+            }
+            
+            .avatar-section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 25px;
+            }
+            
+            .avatar-preview {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                overflow: hidden;
+                margin-bottom: 15px;
+                border: 2px solid var(--border-color2);
+            }
+            
+            .avatar-preview img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+            .avatar-input {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+            
+            .avatar-generator {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+            
+            .avatar-generator p {
+                margin-bottom: 15px;
+                text-align: center;
+            }
+            
+            .avatar-generator button {
+                padding: 12px 20px;
+                background-color: var(--background-color);
+                color: var(--text-color);
+                border: 2px solid var(--border-color2);
+                border-radius: 8px;
+                cursor: pointer;
+                font-family: var(--font-family);
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .avatar-generator button:hover {
+                background-color: var(--hover-color);
+                transform: translateY(-2px);
+            }
+            
+            .avatar-generator button.boy {
+                border-color: rgba(0, 120, 215, 0.7);
+                background-color: rgba(0, 120, 215, 0.1);
+            }
+            
+            .avatar-generator button.boy:hover {
+                background-color: rgba(0, 120, 215, 0.2);
+            }
+            
+            .avatar-generator button.girl {
+                border-color: rgba(215, 0, 120, 0.7);
+                background-color: rgba(215, 0, 120, 0.1);
+            }
+            
+            .avatar-generator button.girl:hover {
+                background-color: rgba(215, 0, 120, 0.2);
+            }
+            
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: bold;
+            }
+            
+            .form-group input {
+                width: 100%;
+                padding: 12px 15px;
+                background-color: rgba(0, 0, 0, 0.2);
+                border: 2px solid var(--border-color2);
+                border-radius: 8px;
+                color: var(--text-color);
+                font-family: var(--font-family);
+                box-sizing: border-box;
+                font-size: 15px;
+            }
+            
+            .form-group input:focus {
+                outline: none;
+                border-color: var(--hover-color);
+            }
+            
+            .description-text {
+                font-size: 13px;
+                margin-top: 5px;
+                color: rgba(255, 255, 255, 0.6);
+                font-style: italic;
+            }
+            
+            .form-actions {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 30px;
+                gap: 15px;
+            }
+            
+            .form-button {
+                padding: 12px 20px;
+                background-color: var(--background-color);
+                color: var(--text-color);
+                border: 2px solid var(--border-color2);
+                border-radius: 8px;
+                cursor: pointer;
+                font-family: var(--font-family);
+                transition: background-color 0.2s;
+                font-size: 15px;
+            }
+            
+            .form-button:hover {
+                background-color: var(--hover-color);
+            }
+            
+            .form-button.save {
+                background-color: rgba(0, 128, 0, 0.2);
+                border-color: rgba(0, 128, 0, 0.4);
+                flex-grow: 2;
+            }
+            
+            .form-button.save:hover {
+                background-color: rgba(0, 128, 0, 0.3);
+            }
+            
+            .password-section {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid var(--border-color2);
+            }
+            
+            .section-title {
+                margin-bottom: 15px;
+                font-size: 18px;
+            }
+            
+            .error-message {
+                color: #ff5555;
+                margin-top: 5px;
+                font-size: 14px;
+            }
+            
+            .success-message {
+                color: #55ff55;
+                margin-top: 10px;
+                padding: 10px;
+                background-color: rgba(0, 128, 0, 0.1);
+                border-radius: 5px;
+                text-align: center;
+            }
+            
+            ::placeholder {
+                color: rgba(255, 255, 255, 0.5);
+                opacity: 1;
+            }
+            
+            .avatar-option {
+                padding: 8px 12px;
+                background-color: var(--background-color);
+                color: var(--text-color);
+                border: 2px solid var(--border-color2);
+                border-radius: 6px;
+                cursor: pointer;
+                font-family: var(--font-family);
+                transition: all 0.2s;
+            }
+            
+            .avatar-option:hover {
+                background-color: var(--hover-color);
+            }
+            
+            .avatar-option.active {
+                border-color: #4285F4;
+                background-color: rgba(66, 133, 244, 0.2);
+            }
+            
+            .avatar-preview-item {
+                border: 2px solid transparent;
+                border-radius: 8px;
+                overflow: hidden;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            
+            .avatar-preview-item:hover {
+                transform: scale(1.05);
+                border-color: var(--border-color2);
+            }
+            
+            .avatar-preview-item.selected {
+                border-color: #4285F4;
+                box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.5);
+            }
+            
+            .avatar-preview-item img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+            
+            #avatar-bg-color {
+                width: 30px;
+                height: 30px;
+                padding: 0;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            
+            #avatar-option-1, #avatar-option-2 {
+                padding: 5px;
+                border-radius: 4px;
+                border: 1px solid var(--border-color2);
+                background-color: var(--background-color);
+                color: var(--text-color);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="content-side">
+            <h1 class="typewriter">Edit Profile</h1>
+            
+            <div class="edit-account-container">
+                <div class="edit-header">
+                    <h2>Update Your Profile</h2>
+                </div>
+                
+                <div class="avatar-section">
+                    <div class="avatar-preview">
+                        <img id="avatarPreview" src="images/other/user.png" alt="Profile">
+                    </div>
+                    <div class="avatar-input">
+                        <div class="avatar-generator" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                            <p style="margin-bottom: 15px; text-align: center;">Choose an avatar:</p>
+                            <div style="display: flex; gap: 15px; justify-content: center;">
+                                <button type="button" id="generateBoyAvatar" class="avatar-button boy">
+                                    <span>Random Boy Avatar</span>
+                                </button>
+                                <button type="button" id="generateGirlAvatar" class="avatar-button girl">
+                                    <span>Random Girl Avatar</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="avatarUrl" value="">
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="editProfileForm" onsubmit="return false;">
+                    <div class="form-group">
+                        <label for="username">Username (cannot be changed)</label>
+                        <input type="text" id="username" name="username" readonly disabled>
+                        <div class="description-text">Your permanent username for identification.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="displayName">Display Name</label>
+                        <input type="text" id="displayName" name="displayName" required>
+                        <div class="description-text">This is the name that appears to other users. You can change this anytime.</div>
+                    </div>
+                    
+                    <div id="successMessage" class="success-message" style="display: none;"></div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="form-button" id="cancelButton">Cancel</button>
+                        <button type="button" class="form-button save" id="saveButton">Save Changes</button>
+                    </div>
+                </form>
+                
+                <div class="password-section">
+                    <h3 class="section-title">Password Management</h3>
+                    <div class="form-group">
+                        <button type="button" class="form-button" id="resetPasswordButton">Reset Password</button>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="linkp" style="margin-top: 20px;"><a href="account.html">back to account</a> • <a href="index.html">homepage</a></p>
+        </div>
+        
+        <!-- Firebase SDK -->
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-auth-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore-compat.js"></script>
+        
+        <script>
+            // Initialize Firebase
+            const firebaseConfig = {
+                apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+                authDomain: "vexplay-33e9f.firebaseapp.com",
+                projectId: "vexplay-33e9f",
+                storageBucket: "vexplay-33e9f.firebasestorage.app",
+                messagingSenderId: "797854431681",
+                appId: "1:797854431681:web:b09b88437937b9fc551740",
+                measurementId: "G-KRWYW4Z4Y3"
+            };
+            
+            // Initialize Firebase
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            
+            // Global variables
+            const db = firebase.firestore();
+            const auth = firebase.auth();
+            let avatarPreview, avatarUrl, displayNameInput, usernameInput, editProfileForm;
+            let cancelButton, resetPasswordButton, successMessage, saveButton;
+            let generateBoyAvatar, generateGirlAvatar;
+            
+            // Check if user is logged in
+            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+            const isGuest = localStorage.getItem('isGuest') === 'true';
+            const userId = localStorage.getItem('userId');
+            const userEmail = localStorage.getItem('userEmail');
+            
+            // Generate a default username from email
+            function generateUsernameFromEmail(email) {
+                // Extract everything before the @ symbol
+                const username = email.split('@')[0];
+                
+                // Clean up the username - remove special characters, allow only letters, numbers, and underscores
+                return username.replace(/[^a-zA-Z0-9_]/g, '');
+            }
+            
+            // Check if a username is already taken
+            async function isUsernameTaken(username) {
+                try {
+                    const snapshot = await db.collection('userProfiles')
+                        .where('username', '==', username)
+                        .limit(1)
+                        .get();
+                    
+                    return !snapshot.empty;
+                } catch (error) {
+                    console.error("Error checking username:", error);
+                    return false; // Assume not taken in case of error
+                }
+            }
+            
+            // Generate a unique username by adding numbers if necessary
+            async function generateUniqueUsername(baseUsername) {
+                let username = baseUsername;
+                let counter = 0;
+                let isUnique = false;
+                
+                while (!isUnique) {
+                    const isTaken = await isUsernameTaken(username);
+                    if (!isTaken) {
+                        isUnique = true;
+                    } else {
+                        counter++;
+                        username = `${baseUsername}${counter}`;
+                    }
+                    
+                    // Safety check to prevent infinite loops
+                    if (counter > 100) {
+                        // If we've tried 100 variations, just add a random number
+                        username = `${baseUsername}_${Math.floor(Math.random() * 10000)}`;
+                        break;
+                    }
+                }
+                
+                return username;
+            }
+            
+            // Load user data
+            async function loadUserData() {
+                console.log("Loading user data for userId:", userId);
+                
+                // Set known values from localStorage
+                const storedDisplayName = localStorage.getItem('displayName');
+                const storedAvatarUrl = localStorage.getItem('avatarUrl');
+                
+                displayNameInput.value = storedDisplayName || '';
+                
+                if (storedAvatarUrl) {
+                    avatarUrl.value = storedAvatarUrl;
+                    avatarPreview.src = storedAvatarUrl;
+                }
+                
+                try {
+                    // Fetch from Firestore for complete data
+                    const userProfileRef = db.collection('userProfiles').doc(userId);
+                    const doc = await userProfileRef.get();
+                    
+                    if (doc.exists) {
+                        console.log("User profile document exists, using existing data");
+                        const profile = doc.data();
+                        
+                        // Set display name
+                        if (profile.displayName) {
+                            displayNameInput.value = profile.displayName;
+                        }
+                        
+                        // Set avatar URL
+                        if (profile.avatarUrl) {
+                            avatarUrl.value = profile.avatarUrl;
+                            avatarPreview.src = profile.avatarUrl;
+                        }
+                        
+                        // Set username (if exists)
+                        if (profile.username) {
+                            usernameInput.value = profile.username;
+                        } else {
+                            // No username set yet, generate one from email
+                            let baseUsername = generateUsernameFromEmail(userEmail);
+                            const uniqueUsername = await generateUniqueUsername(baseUsername);
+                            usernameInput.value = uniqueUsername;
+                            
+                            // Save this username to Firestore right away since it's the first time
+                            await userProfileRef.set({
+                                username: uniqueUsername,
+                                displayName: profile.displayName || storedDisplayName || '',
+                                avatarUrl: profile.avatarUrl || storedAvatarUrl || '',
+                                email: userEmail,
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                usernameSetAt: firebase.firestore.FieldValue.serverTimestamp()
+                            }, { merge: true }); // Use merge to preserve other fields
+                        }
+                    } else {
+                        console.log("User profile document does not exist, creating it now");
+                        // Document doesn't exist, create it with default values
+                        let baseUsername = generateUsernameFromEmail(userEmail);
+                        const uniqueUsername = await generateUniqueUsername(baseUsername);
+                        usernameInput.value = uniqueUsername;
+                        
+                        const newProfileData = {
+                            displayName: storedDisplayName || '',
+                            avatarUrl: storedAvatarUrl || '',
+                            username: uniqueUsername,
+                            email: userEmail,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            usernameSetAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        
+                        console.log("Creating new profile with data:", newProfileData);
+                        
+                        // Create the document
+                        await userProfileRef.set(newProfileData);
+                        console.log("Profile document created successfully");
+                    }
+                } catch (error) {
+                    console.error("Error in loadUserData:", error);
+                    // Show error to user
+                    successMessage.textContent = 'Error loading profile: ' + error.message;
+                    successMessage.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
+                    successMessage.style.color = '#ff5555';
+                    successMessage.style.display = 'block';
+                }
+            }
+            
+            // Check if we're online
+            function isOnline() {
+                return navigator.onLine;
+            }
+            
+            // Generate random avatar
+            function generateRandomAvatar(gender) {
+                // Generate a timestamp to prevent caching
+                const timestamp = new Date().getTime();
+                
+                // Direct API URL without variants or parameters
+                const avatarApiUrl = `https://avatar.iran.liara.run/public/${gender}?t=${timestamp}`;
+                
+                // Set the avatar preview and URL
+                avatarPreview.src = avatarApiUrl;
+                avatarUrl.value = avatarApiUrl;
+                
+                console.log(`Generated random ${gender} avatar: ${avatarApiUrl}`);
+                return avatarApiUrl;
+            }
+            
+            // Handle form submission
+            async function handleFormSubmit() {
+                const newDisplayName = displayNameInput.value.trim();
+                const newAvatarUrl = avatarUrl.value.trim();
+                const username = usernameInput.value.trim(); // Get the current username (which can't be changed)
+                
+                // Check if we're online
+                if (!isOnline()) {
+                    alert('You appear to be offline. Please check your internet connection and try again.');
+                    return;
+                }
+                
+                // Basic validation
+                if (!newDisplayName) {
+                    alert('Please enter a display name');
+                    return;
+                }
+                
+                // Disable save button and show saving status
+                saveButton.disabled = true;
+                saveButton.textContent = 'Saving...';
+                
+                try {
+                    const userProfileRef = db.collection('userProfiles').doc(userId);
+                    
+                    // First check if the document exists
+                    const docSnapshot = await userProfileRef.get();
+                    
+                    if (!docSnapshot.exists) {
+                        // Document doesn't exist, we need to create it
+                        console.log("Document does not exist, creating it now...");
+                        
+                        // Generate a username if we don't have one
+                        if (!username) {
+                            const defaultUsername = generateUsernameFromEmail(userEmail);
+                            const uniqueUsername = await generateUniqueUsername(defaultUsername);
+                            usernameInput.value = uniqueUsername;
+                            
+                            // Create the document with all fields
+                            await userProfileRef.set({
+                                displayName: newDisplayName,
+                                avatarUrl: newAvatarUrl,
+                                username: uniqueUsername,
+                                email: userEmail,
+                                setupComplete: true,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                usernameSetAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        } else {
+                            // Create the document with existing username
+                            await userProfileRef.set({
+                                displayName: newDisplayName,
+                                avatarUrl: newAvatarUrl,
+                                username: username,
+                                email: userEmail,
+                                setupComplete: true,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                usernameSetAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                    } else {
+                        // Document exists, just update it
+                        console.log("Document exists, updating it...");
+                        await userProfileRef.update({
+                            displayName: newDisplayName,
+                            avatarUrl: newAvatarUrl,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                    
+                    // Update local storage
+                    localStorage.setItem('displayName', newDisplayName);
+                    localStorage.setItem('avatarUrl', newAvatarUrl);
+                    
+                    // Flag that we've updated the profile 
+                    localStorage.setItem('profileUpdated', 'true');
+                    
+                    // Redirect back to account page
+                    window.location.href = 'account.html';
+                } catch (error) {
+                    console.error("Error updating profile:", error);
+                    
+                    // Show error message
+                    successMessage.textContent = 'Error saving profile: ' + error.message;
+                    successMessage.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
+                    successMessage.style.color = '#ff5555';
+                    successMessage.style.display = 'block';
+                    
+                    // Reset button
+                    saveButton.textContent = 'Save Changes';
+                    saveButton.disabled = false;
+                }
+            }
+            
+            // Initialize the page
+            document.addEventListener('DOMContentLoaded', function() {
+                // If user is not logged in or is a guest, redirect to account page
+                if (!isLoggedIn || isGuest) {
+                    window.location.href = 'account.html';
+                    return;
+                }
+                
+                // Get DOM elements
+                avatarPreview = document.getElementById('avatarPreview');
+                avatarUrl = document.getElementById('avatarUrl');
+                displayNameInput = document.getElementById('displayName');
+                usernameInput = document.getElementById('username');
+                editProfileForm = document.getElementById('editProfileForm');
+                cancelButton = document.getElementById('cancelButton');
+                resetPasswordButton = document.getElementById('resetPasswordButton');
+                successMessage = document.getElementById('successMessage');
+                saveButton = document.getElementById('saveButton');
+                generateBoyAvatar = document.getElementById('generateBoyAvatar');
+                generateGirlAvatar = document.getElementById('generateGirlAvatar');
+                
+                // Load user data
+                loadUserData().catch(error => {
+                    console.error("Error loading user data:", error);
+                });
+                
+                // Set up event handlers for avatar generation
+                if (generateBoyAvatar) {
+                    generateBoyAvatar.addEventListener('click', function() {
+                        generateRandomAvatar('boy');
+                    });
+                }
+                
+                if (generateGirlAvatar) {
+                    generateGirlAvatar.addEventListener('click', function() {
+                        generateRandomAvatar('girl');
+                    });
+                }
+                
+                // Handle save button click
+                if (saveButton) {
+                    saveButton.addEventListener('click', function() {
+                        handleFormSubmit().catch(error => {
+                            console.error("Error in form submission:", error);
+                        });
+                    });
+                }
+                
+                // Handle cancel button click
+                if (cancelButton) {
+                    cancelButton.addEventListener('click', function() {
+                        window.location.href = 'account.html';
+                    });
+                }
+                
+                // Handle reset password button click
+                if (resetPasswordButton) {
+                    resetPasswordButton.addEventListener('click', function() {
+                        // Only proceed if we have an email
+                        if (!userEmail) {
+                            alert('Email address not found. Please try again later or contact support.');
+                            return;
+                        }
+                        
+                        if (confirm('Send a password reset email to ' + userEmail + '?')) {
+                            // Send password reset email
+                            firebase.auth().sendPasswordResetEmail(userEmail)
+                                .then(() => {
+                                    // Password reset email sent
+                                    alert('Password reset email sent to ' + userEmail);
+                                    
+                                    // Set flag to show message on account page
+                                    localStorage.setItem('passwordResetRequested', 'true');
+                                    
+                                    // Redirect to account page
+                                    window.location.href = 'account.html';
+                                })
+                                .catch((error) => {
+                                    // An error occurred
+                                    console.error('Error sending password reset email:', error);
+                                    alert('Error sending password reset email: ' + error.message);
+                                });
+                        }
+                    });
+                }
+                
+                // Setup network status listeners
+                window.addEventListener('online', function() {
+                    console.log('Network is online. Profile saving is now available.');
+                    if (saveButton) saveButton.disabled = false;
+                    
+                    // Clear any network-related error messages
+                    if (successMessage && successMessage.textContent.includes('offline')) {
+                        successMessage.style.display = 'none';
+                    }
+                });
+                
+                window.addEventListener('offline', function() {
+                    console.log('Network is offline. Profile saving will be disabled.');
+                    
+                    // Show warning
+                    if (successMessage) {
+                        successMessage.textContent = 'You are currently offline. Profile changes cannot be saved.';
+                        successMessage.style.backgroundColor = 'rgba(255, 165, 0, 0.1)';
+                        successMessage.style.color = '#ffaa55';
+                        successMessage.style.display = 'block';
+                    }
+                    
+                    if (saveButton) saveButton.disabled = true;
+                });
+                
+                // Initial check
+                if (!isOnline()) {
+                    if (saveButton) saveButton.disabled = true;
+                    if (successMessage) {
+                        successMessage.textContent = 'You are currently offline. Profile changes cannot be saved.';
+                        successMessage.style.backgroundColor = 'rgba(255, 165, 0, 0.1)';
+                        successMessage.style.color = '#ffaa55';
+                        successMessage.style.display = 'block';
+                    }
+                }
+            });
+        </script>
+        
+        <script src="/storage/js/cloak.js"></script>
+        <script src="/storage/js/theme.js"></script>
+        <script src="/storage/js/cookie.js"></script>
+        <script src="/storage/js/auth.js"></script>
+        
+        <script>
+            // Typewriter effect for the title
+            const h1 = document.querySelector(".typewriter");
+            const text = h1.textContent;
+            h1.textContent = "";
+            
+            function typeWriter(text, i) {
+                if (i < text.length) {
+                    h1.textContent += text.charAt(i);
+                    setTimeout(function() {
+                        typeWriter(text, i + 1)
+                    }, 100);
+                }
+            }
+            
+            // Start the typewriter effect
+            setTimeout(function() {
+                typeWriter("Edit Profile", 0);
+            }, 300);
+        </script>
+    </body>
+</html> 

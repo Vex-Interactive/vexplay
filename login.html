@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <!-- Vercel Analytics and Speed Insights -->
+        <script defer src="/_vercel/insights/script.js"></script>
+        <script defer src="/_vercel/speed-insights/script.js"></script>
+        
         <script async src="https://www.googletagmanager.com/gtag/js?id=GTM-NX2QKP76"></script>
         <script>
           window.dataLayer = window.dataLayer || [];
@@ -68,6 +72,27 @@
                 outline: none;
                 border-color: var(--hover-color);
                 background-color: rgba(0, 0, 0, 0.3); /* Even darker on focus */
+            }
+            
+            /* Styling for country code select */
+            .form-group select {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+                border: 2px solid var(--border-color2);
+                border-radius: 8px;
+                background-color: rgba(0, 0, 0, 0.2);
+                color: var(--text-color);
+                font-family: var(--font-family);
+                box-sizing: border-box;
+                transition: border-color 0.2s, background-color 0.2s;
+                appearance: auto; /* Keep default dropdown arrow */
+            }
+            
+            .form-group select:focus {
+                outline: none;
+                border-color: var(--hover-color);
+                background-color: rgba(0, 0, 0, 0.3);
             }
             
             .auth-button {
@@ -186,6 +211,9 @@
               <div class="form-group">
                   <label for="password">Password</label>
                   <input type="password" id="password" placeholder="Enter your password">
+                  <div style="text-align: right; margin-top: 5px;">
+                      <a href="#" id="forgotPasswordLink" style="font-size: 14px; text-decoration: underline;">Forgot password?</a>
+                  </div>
               </div>
               
               <button class="auth-button" id="loginButton">Login</button>
@@ -194,18 +222,8 @@
                   <span>or</span>
               </div>
               
-              <button class="auth-button google-button" id="googleLoginButton">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo">
-                  Continue with Google
-              </button>
-              
-              <button class="auth-button" id="anonymousLoginButton" style="margin-top: 10px;">
-                  Continue Anonymously
-              </button>
-              
               <div class="auth-footer">
                   <p>Don't have an account? <a href="signup.html">Sign up</a></p>
-                  <p>Continue as <a href="#" id="guestLoginButton">Guest</a></p>
               </div>
           </div>
 
@@ -214,16 +232,37 @@
           </div>
       </div>
 
+      <!-- Forgot Password Modal -->
+      <div id="forgotPasswordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 1000;">
+          <div style="background-color: var(--background-color); padding: 20px; border-radius: 16px; border: 3px solid var(--border-color2); max-width: 400px; width: 90%;">
+              <h3 style="margin-top: 0;">Reset Password</h3>
+              <p>Enter your email to receive a password reset link.</p>
+              
+              <div class="form-group">
+                  <label for="resetEmail">Email</label>
+                  <input type="email" id="resetEmail" placeholder="Enter your email">
+              </div>
+              
+              <div id="resetError" style="color: #ff6b6b; margin: 10px 0; display: none;"></div>
+              <div id="resetSuccess" style="color: #4BB543; margin: 10px 0; display: none;"></div>
+              
+              <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                  <button id="cancelResetBtn" class="auth-button" style="width: 48%;">Cancel</button>
+                  <button id="sendResetBtn" class="auth-button" style="width: 48%;">Send Reset Link</button>
+              </div>
+          </div>
+      </div>
+
+      <!-- Add reCAPTCHA for phone auth -->
+      <script src="https://www.google.com/recaptcha/api.js"></script>
+
       <!-- Firebase SDK -->
-      <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-        import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { runFirebaseDiagnostics } from "./storage/js/firebase-diagnostic.js";
-        import { emergencyLogin, createGuestSession } from "./storage/js/offline-auth-fallback.js";
-        
-        // Direct Firebase configuration - no encryption
+      <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-auth-compat.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore-compat.js"></script>
+
+      <script>
+        // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
             authDomain: "vexplay-33e9f.firebaseapp.com",
@@ -234,462 +273,312 @@
             measurementId: "G-KRWYW4Z4Y3"
         };
 
-        // Initialize Firebase with retry mechanism
-        let app, auth, provider;
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
         
-        try {
-            app = initializeApp(firebaseConfig);
-            const analytics = getAnalytics(app);
-            auth = getAuth(app);
-            provider = new GoogleAuthProvider();
-        } catch (error) {
-            // Handle Firebase initialization error
-            console.error("Firebase initialization error:", error);
-            const errorElement = document.getElementById('loginError');
-            errorElement.textContent = "Connection to authentication service failed. Please try again later.";
-            errorElement.style.display = "block";
-            
-            // Add retry button in case of Firebase initialization error
-            const retryButton = document.createElement('button');
-            retryButton.textContent = "Retry Connection";
-            retryButton.className = "auth-button";
-            retryButton.style.marginTop = "15px";
-            errorElement.parentNode.insertBefore(retryButton, errorElement.nextSibling);
-            
-            retryButton.addEventListener('click', () => {
-                window.location.reload();
-            });
-            
-            // Add diagnose button for further troubleshooting
-            const diagnoseButton = document.createElement('button');
-            diagnoseButton.textContent = "Run Diagnostics";
-            diagnoseButton.className = "auth-button";
-            diagnoseButton.style.marginTop = "10px";
-            diagnoseButton.style.marginBottom = "10px";
-            retryButton.parentNode.insertBefore(diagnoseButton, retryButton.nextSibling);
-            
-            diagnoseButton.addEventListener('click', async () => {
-                diagnoseButton.textContent = "Running Diagnostics...";
-                diagnoseButton.disabled = true;
-                
-                // Show diagnostic progress
-                const diagnosticResultsElem = document.createElement('div');
-                diagnosticResultsElem.id = 'diagnostic-results';
-                diagnosticResultsElem.style.marginTop = '15px';
-                diagnosticResultsElem.style.textAlign = 'left';
-                diagnosticResultsElem.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
-                diagnosticResultsElem.style.padding = '10px';
-                diagnosticResultsElem.style.borderRadius = '5px';
-                diagnosticResultsElem.style.fontSize = '14px';
-                diagnosticResultsElem.style.whiteSpace = 'pre-line';
-                diagnosticResultsElem.textContent = "Running diagnostics, please wait...";
-                
-                retryButton.parentNode.insertBefore(diagnosticResultsElem, diagnoseButton.nextSibling);
-                
-                try {
-                    // Run diagnostics with the API key
-                    const results = await runFirebaseDiagnostics(firebaseConfig.apiKey);
-                    
-                    // Display diagnostic results
-                    diagnosticResultsElem.innerHTML = `
-                        <strong>Diagnostic Results:</strong>
-                        <br>
-                        Browser Compatible: ${results.browserCompatible ? '✅' : '❌'}
-                        <br>
-                        Network Connection: ${results.googleConnectivity ? '✅' : '❌'}
-                        <br>
-                        Firebase SDK: ${results.firebaseSDKLoaded ? '✅' : '❌'}
-                        <br>
-                        Content Blockers: ${results.noContentBlockers ? '✅ None detected' : '❌ Detected'}
-                        <br>
-                        API Key Valid: ${results.apiKeyValid ? '✅' : '❌'}
-                        <br>
-                        Storage Permissions: ${results.storagePermissionsGranted ? '✅' : '❌'}
-                        <br><br>
-                        <strong>Recommendations:</strong>
-                        <br>
-                        ${results.recommendations}
-                    `;
-                } catch (error) {
-                    diagnosticResultsElem.textContent = `Error running diagnostics: ${error.message}`;
-                } finally {
-                    diagnoseButton.textContent = "Run Diagnostics";
-                    diagnoseButton.disabled = false;
-                }
-            });
-        }
-
-        // Network status listener
-        window.addEventListener('online', () => {
-            const errorElement = document.getElementById('loginError');
-            if (errorElement.textContent.includes('connection') || errorElement.textContent.includes('network')) {
-                errorElement.textContent = "Connection restored. You can try logging in now.";
-                errorElement.style.color = "#4BB543";
-                errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
-                setTimeout(() => {
-                    errorElement.style.display = "none";
-                }, 3000);
-            }
-        });
-
-        // Add a manual diagnostic check button for login errors
-        document.getElementById('loginButton').addEventListener('click', async () => {
+        // Handle login form submission
+        document.getElementById('loginButton').addEventListener('click', function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const errorElement = document.getElementById('loginError');
+            const errorDiv = document.getElementById('loginError');
             
             if (!email || !password) {
-                errorElement.textContent = "Please enter both email and password";
-                errorElement.style.display = "block";
+                errorDiv.textContent = 'Please enter both email and password';
+                errorDiv.style.display = 'block';
                 return;
             }
             
-            // Check for internet connection
-            if (!navigator.onLine) {
-                errorElement.textContent = "No internet connection. Please check your network and try again.";
-                errorElement.style.display = "block";
-                
-                // Add a troubleshoot button only if it doesn't exist yet
-                if (!document.getElementById('troubleshoot-button')) {
-                    const troubleshootButton = document.createElement('button');
-                    troubleshootButton.id = 'troubleshoot-button';
-                    troubleshootButton.textContent = "Troubleshoot Connection";
-                    troubleshootButton.className = "auth-button";
-                    troubleshootButton.style.marginTop = "15px";
-                    errorElement.parentNode.insertBefore(troubleshootButton, errorElement.nextSibling);
-                    
-                    troubleshootButton.addEventListener('click', async () => {
-                        troubleshootButton.textContent = "Running Diagnostics...";
-                        troubleshootButton.disabled = true;
-                        
-                        try {
-                            // Run diagnostics
-                            const results = await runFirebaseDiagnostics(firebaseConfig.apiKey);
-                            
-                            // Create or update diagnostic results element
-                            let diagnosticResultsElem = document.getElementById('diagnostic-results');
-                            if (!diagnosticResultsElem) {
-                                diagnosticResultsElem = document.createElement('div');
-                                diagnosticResultsElem.id = 'diagnostic-results';
-                                diagnosticResultsElem.style.marginTop = '15px';
-                                diagnosticResultsElem.style.textAlign = 'left';
-                                diagnosticResultsElem.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
-                                diagnosticResultsElem.style.padding = '10px';
-                                diagnosticResultsElem.style.borderRadius = '5px';
-                                diagnosticResultsElem.style.fontSize = '14px';
-                                diagnosticResultsElem.style.whiteSpace = 'pre-line';
-                                troubleshootButton.parentNode.insertBefore(diagnosticResultsElem, troubleshootButton.nextSibling);
-                            }
-                            
-                            // Display diagnostic results
-                            diagnosticResultsElem.innerHTML = `
-                                <strong>Diagnostic Results:</strong>
-                                <br>
-                                Browser Compatible: ${results.browserCompatible ? '✅' : '❌'}
-                                <br>
-                                Network Connection: ${results.googleConnectivity ? '✅' : '❌'}
-                                <br>
-                                Firebase SDK: ${results.firebaseSDKLoaded ? '✅' : '❌'}
-                                <br>
-                                Content Blockers: ${results.noContentBlockers ? '✅ None detected' : '❌ Detected'}
-                                <br>
-                                API Key Valid: ${results.apiKeyValid ? '✅' : '❌'}
-                                <br>
-                                Storage Permissions: ${results.storagePermissionsGranted ? '✅' : '❌'}
-                                <br><br>
-                                <strong>Recommendations:</strong>
-                                <br>
-                                ${results.recommendations}
-                            `;
-                        } catch (error) {
-                            errorElement.textContent = `Error running diagnostics: ${error.message}`;
-                        } finally {
-                            troubleshootButton.textContent = "Troubleshoot Connection";
-                            troubleshootButton.disabled = false;
-                        }
-                    });
-                }
-                
-                return;
-            }
+            // Clear any previous errors
+            errorDiv.style.display = 'none';
             
-            // Show loading message
-            errorElement.textContent = "Logging in...";
-            errorElement.style.color = "#ffffff";
-            errorElement.style.backgroundColor = "rgba(0, 150, 255, 0.1)";
-            errorElement.style.display = "block";
-            
-            signInWithEmailAndPassword(auth, email, password)
+            // Attempt to sign in with email and password
+            firebase.auth().signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // Login successful
+                    // User signed in successfully
                     const user = userCredential.user;
                     localStorage.setItem('userLoggedIn', 'true');
                     localStorage.setItem('userEmail', user.email);
                     localStorage.setItem('userId', user.uid);
                     localStorage.setItem('isGuest', 'false');
-                    window.location.href = 'index.html';
-                })
-                .catch((error) => {
-                    // Reset error styling
-                    errorElement.style.color = "#ff6b6b";
-                    errorElement.style.backgroundColor = "rgba(255, 107, 107, 0.1)";
                     
-                    // Handle errors
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    console.error(errorCode, errorMessage);
+                    // Get default display name from email (as fallback)
+                    const defaultDisplayName = user.email.split('@')[0];
                     
-                    if (errorCode === 'auth/invalid-credential') {
-                        errorElement.textContent = "Invalid email or password";
-                    } else if (errorCode === 'auth/user-not-found') {
-                        errorElement.textContent = "No account found with this email";
-                    } else if (errorCode === 'auth/wrong-password') {
-                        errorElement.textContent = "Incorrect password";
-                    } else if (errorCode === 'auth/network-request-failed') {
-                        errorElement.textContent = "Network connection error. Please check your internet connection and try again.";
-                        
-                        // Show troubleshoot container for network errors
-                        document.getElementById('troubleshoot-container').style.display = "block";
-                        
-                        // Try to use anonymous auth as a fallback for network errors
-                        setTimeout(() => {
-                            try {
-                                signInAnonymously(auth)
-                                    .then((userCredential) => {
-                                        console.log("Anonymous fallback login successful");
-                                        // Only store minimal info for anonymous users
-                                        localStorage.setItem('userLoggedIn', 'true');
-                                        localStorage.setItem('isGuest', 'true');
-                                        localStorage.setItem('userId', userCredential.user.uid);
-                                        
-                                        errorElement.style.color = "#4BB543";
-                                        errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
-                                        errorElement.textContent = "Fallback to anonymous login successful. Redirecting...";
-                                        
-                                        setTimeout(() => {
-                                            window.location.href = 'index.html';
-                                        }, 1500);
-                                    })
-                                    .catch((anonError) => {
-                                        console.error("Anonymous login also failed:", anonError);
-                                    });
-                            } catch (e) {
-                                console.error("Error with anonymous auth:", e);
-                            }
-                        }, 2000); // Wait 2 seconds before trying anonymous auth
-                        
-                    } else if (errorCode === 'auth/invalid-api-key') {
-                        errorElement.textContent = "Firebase authentication error: API key is invalid. Please contact support.";
-                        
-                        // Show troubleshoot container for API key issues
-                        document.getElementById('troubleshoot-container').style.display = "block";
-                        
-                    } else {
-                        errorElement.textContent = "Login failed: " + errorMessage;
+                    // First check if we can access Firestore
+                    if (typeof firebase === 'undefined' || typeof firebase.firestore !== 'function') {
+                        console.warn("Firestore not available, using fallback authentication flow");
+                        // Use fallback - store display name and redirect
+                        localStorage.setItem('displayName', defaultDisplayName);
+                    
+                        // Redirect to home or the redirect URL if provided
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirectUrl = urlParams.get('redirect') || '/index.html';
+                        window.location.href = redirectUrl;
+                        return;
                     }
                     
-                    errorElement.style.display = "block";
+                    // Check if user has completed account setup
+                    try {
+                        firebase.firestore().collection('userProfiles').doc(user.uid).get()
+                            .then((doc) => {
+                                if (doc.exists) {
+                                    // User profile exists in Firestore
+                                    const profileData = doc.data();
+                                    
+                                    // Store all relevant profile data in localStorage for immediate access
+                                    localStorage.setItem('displayName', profileData.displayName || profileData.username || defaultDisplayName);
+                                    localStorage.setItem('avatarUrl', profileData.avatarUrl || '');
+                                    
+                                    // Store additional profile data if available
+                                    if (profileData.bio) localStorage.setItem('userBio', profileData.bio);
+                                    if (profileData.timezone) localStorage.setItem('userTimezone', profileData.timezone);
+                                    if (profileData.country) localStorage.setItem('userCountry', profileData.country);
+                                    
+                                    // Check if setup is complete
+                                    if (profileData.setupComplete) {
+                                        // Update last login timestamp
+                                        firebase.firestore().collection('userProfiles').doc(user.uid).update({
+                                            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                                        }).catch(error => {
+                                            console.warn("Failed to update last login timestamp:", error);
+                                        });
+                                        
+                                        // Redirect to home or the redirect URL if provided
+                                        const urlParams = new URLSearchParams(window.location.search);
+                                        const redirectUrl = urlParams.get('redirect');
+                                        if (redirectUrl) {
+                                            window.location.href = redirectUrl;
+                                        } else {
+                                            window.location.href = 'index.html';
+                                        }
+                                    } else {
+                                        // User hasn't completed setup, redirect to setup page
+                                        console.log("User hasn't completed account setup. Redirecting to setup page.");
+                                        window.location.href = 'account-setup.html';
+                                    }
+                                } else {
+                                    // No user profile exists, create a minimal one
+                                    console.log("No user profile found in Firestore. Creating a basic profile.");
+                                    const basicProfile = {
+                                        userId: user.uid,
+                                        email: user.email,
+                                        displayName: defaultDisplayName,
+                                        username: defaultDisplayName,
+                                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                                        setupComplete: false
+                                    };
+                                    
+                                    // Save minimal profile to localStorage
+                                    localStorage.setItem('displayName', defaultDisplayName);
+                                    
+                                    // Create the profile in Firestore
+                                    firebase.firestore().collection('userProfiles').doc(user.uid).set(basicProfile)
+                                        .then(() => {
+                                            console.log("Basic profile created. Redirecting to account setup.");
+                                            window.location.href = 'account-setup.html';
+                                        })
+                                        .catch(error => {
+                                            console.error("Error creating basic profile:", error);
+                                            // Redirect to setup page anyway
+                                            window.location.href = 'account-setup.html';
+                                        });
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Error checking account setup:", error);
+                                // Redirect anyway to avoid being stuck on login page
+                                window.location.href = 'account-setup.html';
+                            });
+                    } catch (error) {
+                        console.error("Exception checking profile:", error);
+                        // Use fallback - store display name and redirect
+                        localStorage.setItem('displayName', defaultDisplayName);
+                        
+                        // Redirect to home as fallback
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirectUrl = urlParams.get('redirect') || '/index.html';
+                        window.location.href = redirectUrl;
+                    }
+                })
+                .catch((error) => {
+                    console.error("Login error:", error);
+                    errorDiv.textContent = 'Login failed: ' + error.message;
+                    errorDiv.style.display = 'block';
+                        
+                    // Show troubleshoot options for network errors
+                    if (error.code === 'auth/network-request-failed') {
+                        document.getElementById('troubleshoot-container').style.display = 'block';
+                    }
                 });
         });
-
-        // Google login
-        document.getElementById('googleLoginButton').addEventListener('click', () => {
-            const errorElement = document.getElementById('loginError');
+                        
+        // Phone authentication
+        let verificationId = '';
+        
+        document.getElementById('sendCodeButton').addEventListener('click', function() {
+            const countryCode = document.getElementById('country-code').value;
+            const phoneInput = document.getElementById('phone').value.trim();
+            const errorDiv = document.getElementById('loginError');
             
-            // Check for internet connection
-            if (!navigator.onLine) {
-                errorElement.textContent = "No internet connection. Please check your network and try again.";
-                errorElement.style.display = "block";
+            if (!phoneInput) {
+                errorDiv.textContent = 'Please enter your phone number';
+                errorDiv.style.display = 'block';
                 return;
             }
             
-            // Show loading message
-            errorElement.textContent = "Connecting to Google...";
-            errorElement.style.color = "#ffffff";
-            errorElement.style.backgroundColor = "rgba(0, 150, 255, 0.1)";
-            errorElement.style.display = "block";
+            // Format the phone number with the country code
+            const phoneNumber = countryCode + phoneInput.replace(/\D/g, '');
             
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    // Google login successful
-                    const user = result.user;
-                    localStorage.setItem('userLoggedIn', 'true');
-                    localStorage.setItem('userEmail', user.email);
-                    localStorage.setItem('userId', user.uid);
-                    localStorage.setItem('isGuest', 'false');
-                    window.location.href = 'index.html';
-                })
-                .catch((error) => {
-                    // Reset error styling
-                    errorElement.style.color = "#ff6b6b";
-                    errorElement.style.backgroundColor = "rgba(255, 107, 107, 0.1)";
-                    
-                    // Handle errors
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    console.error(errorCode, errorMessage);
-                    
-                    if (errorCode === 'auth/network-request-failed') {
-                        errorElement.textContent = "Network connection error. Please check your internet connection and try again.";
-                        
-                        // Show troubleshoot container for network errors
-                        document.getElementById('troubleshoot-container').style.display = "block";
-                        
-                        // Try to use anonymous auth as a fallback for network errors
-                        setTimeout(() => {
-                            try {
-                                signInAnonymously(auth)
-                                    .then((userCredential) => {
-                                        console.log("Anonymous fallback login successful");
-                                        // Only store minimal info for anonymous users
-                                        localStorage.setItem('userLoggedIn', 'true');
-                                        localStorage.setItem('isGuest', 'true');
-                                        localStorage.setItem('userId', userCredential.user.uid);
-                                        
-                                        errorElement.style.color = "#4BB543";
-                                        errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
-                                        errorElement.textContent = "Fallback to anonymous login successful. Redirecting...";
-                                        
-                                        setTimeout(() => {
-                                            window.location.href = 'index.html';
-                                        }, 1500);
-                                    })
-                                    .catch((anonError) => {
-                                        console.error("Anonymous login also failed:", anonError);
-                                    });
-                            } catch (e) {
-                                console.error("Error with anonymous auth:", e);
+            // Show formatting in error div
+            errorDiv.textContent = 'Sending code to ' + phoneNumber;
+            errorDiv.style.color = '#ffffff';
+            errorDiv.style.backgroundColor = 'rgba(0, 150, 255, 0.1)';
+            errorDiv.style.display = 'block';
+            
+            // Setup reCAPTCHA verification
+            const appVerifier = new firebase.auth.RecaptchaVerifier('sendCodeButton', {
+                'size': 'invisible',
+                'callback': function(response) {
+                    // reCAPTCHA solved, allow signInWithPhoneNumber.
+                    console.log('reCAPTCHA verified!');
                             }
-                        }, 2000); // Wait 2 seconds before trying anonymous auth
-                        
-                    } else if (errorCode === 'auth/invalid-api-key') {
-                        errorElement.textContent = "Firebase authentication error: API key is invalid. Please contact support.";
-                        
-                        // Show troubleshoot container for API key issues
-                        document.getElementById('troubleshoot-container').style.display = "block";
-                        
-                    } else if (errorCode === 'auth/popup-closed-by-user') {
-                        errorElement.textContent = "Google login was cancelled. Please try again.";
-                    } else {
-                        errorElement.textContent = "Google login failed: " + errorMessage;
-                    }
-                    
-                    errorElement.style.display = "block";
+            });
+            
+            // Send verification code
+            firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+                .then(function (confirmationResult) {
+                    // SMS sent. Save the verification ID and show the verification code input
+                    verificationId = confirmationResult.verificationId;
+                    document.getElementById('verificationCodeDiv').style.display = 'block';
+                    document.getElementById('sendCodeButton').textContent = 'Resend Code';
+                })
+                .catch(function (error) {
+                    console.error("Phone auth error:", error);
+                    errorDiv.textContent = 'Failed to send verification code: ' + error.message;
+                    errorDiv.style.display = 'block';
+                    appVerifier.clear();
                 });
         });
 
-        // Guest login - no Firebase, just use localStorage
-        document.getElementById('guestLoginButton').addEventListener('click', (e) => {
-            e.preventDefault();
+        // Verify code
+        document.getElementById('verifyCodeButton').addEventListener('click', function() {
+            const verificationCode = document.getElementById('verificationCode').value;
+            const errorDiv = document.getElementById('loginError');
             
-            // Set guest status in localStorage without using Firebase
+            if (!verificationCode) {
+                errorDiv.textContent = 'Please enter verification code';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Clear any previous errors
+            errorDiv.style.display = 'none';
+            
+            // Create credential with verification ID and code
+            const credential = firebase.auth.PhoneAuthProvider.credential(verificationId, verificationCode);
+            
+            // Sign in with credential
+            firebase.auth().signInWithCredential(credential)
+                .then((userCredential) => {
+                    // User signed in successfully
+                    const user = userCredential.user;
+                    localStorage.setItem('userLoggedIn', 'true');
+                    localStorage.setItem('userEmail', user.phoneNumber); // Store phone as identifier
+                    localStorage.setItem('userId', user.uid);
+                    localStorage.setItem('isGuest', 'false');
+                    
+                    // Redirect to home or the redirect URL if provided
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectUrl = urlParams.get('redirect') || '/index.html';
+                    window.location.href = redirectUrl;
+                })
+                .catch((error) => {
+                    console.error("Verification error:", error);
+                    errorDiv.textContent = 'Verification failed: ' + error.message;
+                    errorDiv.style.display = 'block';
+                });
+        });
+
+        // Guest login
+        document.getElementById('immediate-guest-mode').addEventListener('click', function() {
             localStorage.setItem('userLoggedIn', 'true');
             localStorage.setItem('isGuest', 'true');
-            localStorage.setItem('userEmail', 'guest');
-            localStorage.setItem('userId', 'guest-' + Math.random().toString(36).substring(2, 15));
-            window.location.href = 'index.html';
+            
+            // Redirect to home or the redirect URL if provided
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectUrl = urlParams.get('redirect') || '/index.html';
+            window.location.href = redirectUrl;
         });
         
-        // Anonymous login - uses Firebase anonymous auth
-        document.getElementById('anonymousLoginButton').addEventListener('click', () => {
-            const errorElement = document.getElementById('loginError');
-            
-            // Show loading message
-            errorElement.textContent = "Connecting anonymously...";
-            errorElement.style.color = "#ffffff";
-            errorElement.style.backgroundColor = "rgba(0, 150, 255, 0.1)";
-            errorElement.style.display = "block";
-            
-            signInAnonymously(auth)
-                .then((userCredential) => {
-                    // Anonymous login successful
-                    const user = userCredential.user;
-                    localStorage.setItem('userLoggedIn', 'true');
-                    localStorage.setItem('isGuest', 'true');
-                    localStorage.setItem('userId', user.uid);
-                    localStorage.setItem('userEmail', 'anonymous');
-                    window.location.href = 'index.html';
-                })
-                .catch((error) => {
-                    // Reset error styling
-                    errorElement.style.color = "#ff6b6b";
-                    errorElement.style.backgroundColor = "rgba(255, 107, 107, 0.1)";
+        // Password reset functionality
+        const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const resetEmailInput = document.getElementById('resetEmail');
+        const resetError = document.getElementById('resetError');
+        const resetSuccess = document.getElementById('resetSuccess');
+        const cancelResetBtn = document.getElementById('cancelResetBtn');
+        const sendResetBtn = document.getElementById('sendResetBtn');
                     
-                    // Handle errors
-                    console.error("Anonymous login error:", error);
-                    errorElement.textContent = "Anonymous login failed: " + error.message;
-                    
-                    // Fall back to guest mode
-                    setTimeout(() => {
-                        errorElement.textContent = "Falling back to guest mode...";
-                        setTimeout(() => {
-                            // Set guest status in localStorage without using Firebase
-                            createGuestSession();
-                            errorElement.style.color = "#4BB543";
-                            errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
-                            errorElement.textContent = "Guest mode activated. Redirecting...";
-                            setTimeout(() => {
-                                window.location.href = 'index.html';
-                            }, 1500);
-                        }, 1000);
-                    }, 1500);
-                });
+        // Show forgot password modal
+        forgotPasswordLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Pre-fill with email from login form if available
+            const loginEmail = document.getElementById('email').value;
+            if (loginEmail) {
+                resetEmailInput.value = loginEmail;
+            }
+            
+            forgotPasswordModal.style.display = 'flex';
         });
 
-        // Setup immediate offline login button
-        document.getElementById('immediate-offline-login').addEventListener('click', async () => {
-            try {
-                // Import the offline auth module dynamically
-                const { emergencyLogin } = await import('./storage/js/offline-auth-fallback.js');
+        // Hide modal on cancel
+        cancelResetBtn.addEventListener('click', function() {
+            forgotPasswordModal.style.display = 'none';
+            resetError.style.display = 'none';
+            resetSuccess.style.display = 'none';
+        });
+        
+        // Send password reset email
+        sendResetBtn.addEventListener('click', function() {
+            const email = resetEmailInput.value;
                 
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                const errorElement = document.getElementById('loginError');
-                
-                if (!email || !password) {
-                    errorElement.textContent = "Please enter both email and password for offline login";
-                    errorElement.style.display = "block";
+            if (!email) {
+                resetError.textContent = 'Please enter your email address';
+                resetError.style.display = 'block';
+                resetSuccess.style.display = 'none';
                     return;
                 }
                 
-                // Try emergency login
-                const result = emergencyLogin(email, password);
-                
-                if (result.success) {
-                    errorElement.style.color = "#4BB543";
-                    errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
-                    errorElement.textContent = "Offline login successful. Redirecting...";
+            // Clear previous messages
+            resetError.style.display = 'none';
+            resetSuccess.style.display = 'none';
+            
+            // Send password reset email
+            firebase.auth().sendPasswordResetEmail(email)
+                .then(() => {
+                    resetSuccess.textContent = 'Password reset email sent! Check your inbox.';
+                    resetSuccess.style.display = 'block';
+                    
+                    // Close modal after a delay
                     setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1500);
-                } else {
-                    errorElement.textContent = "Offline login failed. Try guest mode or wait for Firebase to be available.";
-                }
-            } catch (error) {
-                console.error('Error with offline login:', error);
-                const errorElement = document.getElementById('loginError');
-                errorElement.textContent = `Error with offline login: ${error.message}`;
-            }
+                        forgotPasswordModal.style.display = 'none';
+                    }, 3000);
+                })
+                .catch((error) => {
+                    console.error("Password reset error:", error);
+                    resetError.textContent = error.message;
+                    resetError.style.display = 'block';
+                });
         });
         
-        // Setup immediate guest mode button
-        document.getElementById('immediate-guest-mode').addEventListener('click', async () => {
-            try {
-                // Import the offline auth module dynamically
-                const { createGuestSession } = await import('./storage/js/offline-auth-fallback.js');
-                
-                createGuestSession();
-                const errorElement = document.getElementById('loginError');
-                errorElement.style.color = "#4BB543";
-                errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
-                errorElement.textContent = "Guest mode activated. Redirecting...";
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1500);
-            } catch (error) {
-                console.error('Error with guest mode:', error);
-                const errorElement = document.getElementById('loginError');
-                errorElement.textContent = `Error with guest mode: ${error.message}`;
+        // Close modal when clicking outside
+        forgotPasswordModal.addEventListener('click', function(e) {
+            if (e.target === forgotPasswordModal) {
+                forgotPasswordModal.style.display = 'none';
+                resetError.style.display = 'none';
+                resetSuccess.style.display = 'none';
             }
         });
       </script>

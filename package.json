@@ -1,0 +1,18 @@
+{
+  "name": "vexplay",
+  "version": "12.0.0",
+  "description": "An open source games site hosting 500+ games",
+  "main": "index.html",
+  "dependencies": {
+    "@vercel/analytics": "^1.1.1",
+    "@vercel/speed-insights": "^1.0.2",
+    "firebase": "^10.6.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "author": "Vex-Interactive",
+  "license": "MIT"
+} 

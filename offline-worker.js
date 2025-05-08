@@ -1,6 +1,10 @@
 const CACHE_NAME = 'VexPlay-cache';
 const OFFLINE_URLS = [
     '/offline.html',
+    '/eu3-chat.html',
+    '/storage/css/themes.css',
+    '/storage/js/theme.js',
+    '/storage/fonts/ubuntu/Ubuntu.woff2'
 ];
 
 self.addEventListener('install', function(event) {
@@ -17,13 +21,21 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+    // Skip Firebase requests
+    if (event.request.url.includes('firebase') || 
+        event.request.url.includes('googleapis') ||
+        event.request.url.includes('gstatic.com')) {
+        return;
+    }
+
     event.respondWith(
         fetch(event.request).catch(function() {
             return caches.match(event.request).then(function(response) {
                 if (response) {
                     return response;
                 }
-                if (event.request.mode === 'navigate') {
+                // Don't show offline page for chat
+                if (event.request.mode === 'navigate' && !event.request.url.includes('chat')) {
                     return caches.match('./offline.html');
                 }
             });

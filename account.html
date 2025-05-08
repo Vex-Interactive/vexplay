@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Vercel Analytics and Speed Insights -->
+        <script defer src="/_vercel/insights/script.js"></script>
+        <script defer src="/_vercel/speed-insights/script.js"></script>
+        
+        <script async src="https://www.googletagmanager.com/gtag/js?id=GTM-NX2QKP76"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-7FN7LEVWXD');
+        </script>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="/images/ico.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/storage/css/index.css">
+        <title>Account | Vexplay</title>
+
+        <meta name="description" content="View and manage your Vexplay account">
+        <meta property="og:site_name" content="Vexplay">
+        <meta property="og:title" content="Vexplay Account">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="View and manage your Vexplay account">
+        
+        <style>
+            .account-container {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                border: 3px solid var(--border-color2);
+                border-radius: 16px;
+                background-color: var(--background-color);
+            }
+            
+            .account-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid var(--border-color2);
+            }
+            
+            .account-avatar {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                overflow: hidden;
+                margin-right: 20px;
+                border: 2px solid var(--border-color2);
+            }
+            
+            .account-avatar img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+            .account-name-section {
+                flex: 1;
+            }
+            
+            .account-name {
+                font-size: 28px;
+                margin: 0 0 5px 0;
+                display: flex;
+                align-items: center;
+            }
+            
+            .account-email {
+                font-size: 16px;
+                opacity: 0.7;
+                margin: 0;
+            }
+            
+            .account-edit-button {
+                padding: 8px 16px;
+                background-color: var(--background-color);
+                color: var(--text-color);
+                border: 2px solid var(--border-color2);
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+                margin-left: auto;
+                text-decoration: none;
+                font-size: 14px;
+                display: inline-block;
+            }
+            
+            .account-edit-button:hover {
+                background-color: var(--hover-color);
+            }
+            
+            .account-section {
+                margin-bottom: 30px;
+                padding: 20px;
+                border: 2px solid var(--border-color2);
+                border-radius: 10px;
+                background-color: rgba(0, 0, 0, 0.1);
+            }
+            
+            .account-section-title {
+                font-size: 20px;
+                margin: 0 0 15px 0;
+                padding-bottom: 10px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .account-detail-item {
+                display: flex;
+                margin-bottom: 10px;
+            }
+            
+            .account-detail-label {
+                width: 150px;
+                opacity: 0.7;
+            }
+            
+            .account-detail-value {
+                flex: 1;
+            }
+            
+            .favorite-games {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+                margin-top: 15px;
+            }
+            
+            .favorite-game {
+                padding: 10px;
+                border: 1px solid var(--border-color2);
+                border-radius: 8px;
+                text-align: center;
+                background-color: rgba(0, 0, 0, 0.2);
+                transition: transform 0.2s, background-color 0.2s;
+            }
+            
+            .favorite-game:hover {
+                transform: translateY(-3px);
+                background-color: rgba(0, 0, 0, 0.3);
+            }
+            
+            .favorite-game a {
+                text-decoration: none;
+                color: var(--text-color);
+                display: block;
+            }
+            
+            .favorite-game img {
+                width: 100%;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 5px;
+                margin-bottom: 8px;
+            }
+            
+            .favorite-game-name {
+                font-size: 14px;
+                margin: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .settings-form-group {
+                margin-bottom: 15px;
+            }
+            
+            .settings-form-group label {
+                display: block;
+                margin-bottom: 5px;
+                font-size: 14px;
+                opacity: 0.8;
+            }
+            
+            .settings-form-group input {
+                width: 100%;
+                padding: 8px 12px;
+                background-color: rgba(0, 0, 0, 0.2);
+                border: 1px solid var(--border-color2);
+                border-radius: 4px;
+                color: var(--text-color);
+                font-family: var(--font-family);
+            }
+            
+            .settings-form-group input:focus {
+                outline: none;
+                border-color: var(--hover-color);
+            }
+            
+            .settings-form-actions {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 20px;
+                gap: 10px;
+            }
+            
+            .friend-list {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+            
+            .friend-item {
+                display: flex;
+                align-items: center;
+                padding: 10px;
+                border: 1px solid var(--border-color2);
+                border-radius: 8px;
+                background-color: rgba(0, 0, 0, 0.2);
+            }
+            
+            .friend-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                margin-right: 10px;
+                overflow: hidden;
+            }
+            
+            .friend-avatar img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+            .friend-info {
+                flex: 1;
+            }
+            
+            .friend-name {
+                font-size: 16px;
+                margin: 0;
+            }
+            
+            .friend-status {
+                font-size: 12px;
+                opacity: 0.7;
+                margin: 3px 0 0 0;
+            }
+            
+            .login-prompt {
+                text-align: center;
+                padding: 40px 20px;
+                font-size: 18px;
+            }
+            
+            .login-prompt a {
+                color: var(--text-color);
+                text-decoration: underline;
+                margin-left: 5px;
+            }
+            
+            .login-prompt a:hover {
+                color: var(--hover-color);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="content-side">
+            <h1 class="typewriter">My Account</h1>
+            
+            <!-- Login prompt -->
+            <div id="loginPrompt" class="login-prompt" style="display: none;">
+                <p>You need to be logged in to access your account. Please <a href="login.html">login</a> or <a href="signup.html">sign up</a> first.</p>
+            </div>
+            
+            <div id="accountContainer" class="account-container" style="display: none;">
+                <div class="account-header">
+                    <div class="account-avatar">
+                        <img id="accountAvatar" src="images/other/user.png" alt="Profile">
+                    </div>
+                    <div class="account-name-section">
+                        <h2 class="account-name" id="accountDisplayName">Username</h2>
+                    </div>
+                    <a href="edit-account.html" class="account-edit-button" id="editAccountButton">Edit Profile</a>
+                </div>
+                
+                <!-- Remove debug info and buttons -->
+                <!-- <div id="debugInfo" style="margin-bottom: 15px; font-size: 14px; text-align: right;">
+                    <a href="#" id="refreshProfileBtn" style="color: var(--text-color); text-decoration: underline; margin-right: 15px; background-color: rgba(255, 255, 255, 0.1); padding: 5px 10px; border-radius: 4px;">Refresh Profile</a>
+                    <a href="#" id="forceSaveBtn" style="color: var(--text-color); text-decoration: underline; background-color: rgba(0, 200, 0, 0.2); padding: 5px 10px; border-radius: 4px;">Force Save Data</a>
+                    <div id="lastRefreshed" style="margin-top: 5px; opacity: 0.7;"></div>
+                </div> -->
+                
+                <div class="account-section">
+                    <h3 class="account-section-title">Account Details</h3>
+                    
+                    <div class="account-detail-item">
+                        <div class="account-detail-label">User ID:</div>
+                        <div class="account-detail-value" id="accountUserId">-</div>
+                    </div>
+                    
+                    <div class="account-detail-item">
+                        <div class="account-detail-label">Account Type:</div>
+                        <div class="account-detail-value" id="accountType">Standard</div>
+                    </div>
+                    
+                    <div class="account-detail-item">
+                        <div class="account-detail-label">Joined:</div>
+                        <div class="account-detail-value" id="accountJoined">-</div>
+                    </div>
+                    
+                    <div class="account-detail-item">
+                        <div class="account-detail-label">Last Login:</div>
+                        <div class="account-detail-value" id="accountLastLogin">-</div>
+                    </div>
+                </div>
+                
+                <div class="account-section">
+                    <h3 class="account-section-title">Favorite Games</h3>
+                    <div id="favoriteGames" class="favorite-games">
+                        <p>No favorite games added yet.</p>
+                    </div>
+                </div>
+                
+                <div class="account-section">
+                    <h3 class="account-section-title">Friends</h3>
+                    <div id="friendsList" class="friend-list">
+                        <p>Friends feature coming soon.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="linkp" style="margin-top: 20px;"><a href="index.html">back to homepage</a> • <a href="https://discord.gg/k9MH6Y875s" target="_blank">discord</a></p>
+        </div>
+        
+        <!-- Firebase SDK -->
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-auth-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore-compat.js"></script>
+
+        <script>
+            // Initialize Firebase
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+                    authDomain: "vexplay-33e9f.firebaseapp.com",
+                    projectId: "vexplay-33e9f",
+                    storageBucket: "vexplay-33e9f.firebasestorage.app",
+                    messagingSenderId: "797854431681",
+                    appId: "1:797854431681:web:b09b88437937b9fc551740",
+                    measurementId: "G-KRWYW4Z4Y3"
+                };
+                
+                // Initialize Firebase
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                
+                // References
+                const db = firebase.firestore();
+                
+                // Test Firestore connection
+                if (!db) {
+                    throw new Error("Firestore not initialized properly");
+                }
+                
+                console.log("Firebase initialized successfully in account.html");
+            } catch (error) {
+                console.error("Error initializing Firebase in account.html:", error);
+                
+                // Handle initialization error by showing account from localStorage as fallback
+                if (isLoggedIn && !isGuest) {
+                    loginPrompt.style.display = 'none';
+                    accountContainer.style.display = 'block';
+                    
+                    // Set basic info from localStorage
+                    if (displayName) accountDisplayName.textContent = displayName;
+                    if (userId) accountUserId.textContent = userId;
+                    accountType.textContent = 'Standard Account';
+                    
+                    // Show error message
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.color = 'red';
+                    errorDiv.style.padding = '10px';
+                    errorDiv.style.marginBottom = '15px';
+                    errorDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
+                    errorDiv.style.borderRadius = '5px';
+                    errorDiv.textContent = 'Error connecting to database: ' + error.message;
+                    
+                    if (accountContainer.firstChild) {
+                        accountContainer.insertBefore(errorDiv, accountContainer.firstChild);
+                    }
+                }
+            }
+            
+            // DOM Elements
+            const loginPrompt = document.getElementById('loginPrompt');
+            const accountContainer = document.getElementById('accountContainer');
+            const accountAvatar = document.getElementById('accountAvatar');
+            const accountDisplayName = document.getElementById('accountDisplayName');
+            const accountUserId = document.getElementById('accountUserId');
+            const accountType = document.getElementById('accountType');
+            const accountJoined = document.getElementById('accountJoined');
+            const accountLastLogin = document.getElementById('accountLastLogin');
+            const editAccountButton = document.getElementById('editAccountButton');
+            const favoriteGames = document.getElementById('favoriteGames');
+            const friendsList = document.getElementById('friendsList');
+            
+            // Check if user is logged in
+            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+            const userId = localStorage.getItem('userId') || 'guest-' + Math.random().toString(36).substring(2, 15);
+            const userEmail = localStorage.getItem('userEmail') || 'Anonymous';
+            const isGuest = localStorage.getItem('isGuest') === 'true';
+            const displayName = localStorage.getItem('displayName');
+            
+            // Debug log authentication state
+            console.log("Auth state:", {
+                isLoggedIn,
+                userId,
+                userEmail,
+                isGuest,
+                displayName
+            });
+            
+            // Force refresh if login state is inconsistent
+            if (isLoggedIn && (!userId || !userEmail)) {
+                console.error("Inconsistent auth state detected - user marked as logged in but missing userId or userEmail");
+                localStorage.removeItem('userLoggedIn');
+                localStorage.removeItem('userId');
+                window.location.reload();
+            }
+            
+            // If user is logged in and not a guest, show account page
+            if (isLoggedIn && !isGuest) {
+                // Show the account page immediately to avoid flashing login prompt
+                loginPrompt.style.display = 'none';
+                accountContainer.style.display = 'block';
+                
+                // Load account data and update UI
+                loadAccountData();
+            } else {
+                // User is not logged in or is a guest - show login prompt
+                loginPrompt.style.display = 'block';
+                accountContainer.style.display = 'none';
+            }
+            
+            // Load account data
+            function loadAccountData() {
+                console.log("Loading account data for user:", userId);
+                
+                // Set loading indicators
+                accountJoined.textContent = "Loading...";
+                accountLastLogin.textContent = "Loading...";
+                
+                // Immediately update UI with basic data we have from localStorage
+                accountUserId.textContent = userId || "Unknown";
+                accountType.textContent = 'Standard Account';
+                
+                if (localStorage.getItem('displayName')) {
+                    accountDisplayName.textContent = localStorage.getItem('displayName');
+                } else {
+                    accountDisplayName.textContent = "User";
+                }
+                
+                if (localStorage.getItem('avatarUrl')) {
+                    accountAvatar.src = localStorage.getItem('avatarUrl');
+                } else {
+                    accountAvatar.src = "images/other/user.png";
+                }
+                
+                // Try to get fresh data from Firestore
+                try {
+                    // Force create a profile document if one doesn't exist
+                    const userProfileRef = db.collection('userProfiles').doc(userId);
+                    
+                    // First check if document exists
+                    userProfileRef.get().then(doc => {
+                        if (doc.exists) {
+                            console.log("User profile exists, loading data");
+                            // Get the most up-to-date data from Firestore
+                            const profileData = doc.data();
+                            updateUIFromFirestore(profileData);
+                            
+                            // Update localStorage with latest data for future use
+                            if (profileData.displayName) localStorage.setItem('displayName', profileData.displayName);
+                            if (profileData.avatarUrl) localStorage.setItem('avatarUrl', profileData.avatarUrl);
+                            
+                            // Update last login timestamp
+                            userProfileRef.update({
+                                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                            }).catch(error => {
+                                console.warn("Failed to update last login timestamp:", error);
+                            });
+                        } else {
+                            console.log("No profile document exists, creating one");
+                            
+                            // Create a basic profile with current data and proper timestamps
+                            const userData = {
+                                userId: userId,
+                                displayName: localStorage.getItem('displayName') || 'User',
+                                username: localStorage.getItem('displayName') || 'User',
+                                email: localStorage.getItem('userEmail') || '',
+                                avatarUrl: localStorage.getItem('avatarUrl') || '',
+                                setupComplete: true,
+                                lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            };
+                            
+                            // Create the document in Firestore
+                            userProfileRef.set(userData)
+                                .then(() => {
+                                    console.log("Profile created successfully");
+                                    // Need to get the document again to get the server timestamp values
+                                    return userProfileRef.get();
+                                })
+                                .then(newDoc => {
+                                    if (newDoc.exists) {
+                                        updateUIFromFirestore(newDoc.data());
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Error creating profile:", error);
+                                });
+                        }
+                    }).catch(error => {
+                        console.error("Error getting user profile:", error);
+                        // Show fallback data from localStorage
+                        const fallbackData = {
+                            userId: userId,
+                            displayName: localStorage.getItem('displayName') || 'User',
+                            email: localStorage.getItem('userEmail') || '',
+                            avatarUrl: localStorage.getItem('avatarUrl') || ''
+                        };
+                        updateUIFromFirestore(fallbackData);
+                    });
+                } catch (error) {
+                    console.error("Error in loadAccountData:", error);
+                    // Use data from localStorage as fallback
+                    const fallbackData = {
+                        userId: userId,
+                        displayName: localStorage.getItem('displayName') || 'User',
+                        email: localStorage.getItem('userEmail') || '',
+                        avatarUrl: localStorage.getItem('avatarUrl') || ''
+                    };
+                    updateUIFromFirestore(fallbackData);
+                }
+                
+                // Load favorite games
+                updateFavoriteGames();
+            }
+            
+            // Update UI elements based on Firestore data
+            function updateUIFromFirestore(profile) {
+                if (!profile) return;
+                
+                console.log("Updating UI with profile data:", profile);
+                
+                // Always show user ID
+                if (profile.userId) {
+                    accountUserId.textContent = profile.userId;
+                } else {
+                    accountUserId.textContent = userId || "Unknown";
+                }
+                
+                // Display name
+                if (profile.displayName) {
+                    accountDisplayName.textContent = profile.displayName;
+                    localStorage.setItem('displayName', profile.displayName);
+                } else if (profile.username) {
+                    accountDisplayName.textContent = profile.username;
+                    localStorage.setItem('displayName', profile.username);
+                } else {
+                    accountDisplayName.textContent = "User";
+                }
+                
+                // Avatar
+                if (profile.avatarUrl) {
+                    accountAvatar.src = profile.avatarUrl;
+                    localStorage.setItem('avatarUrl', profile.avatarUrl);
+                } else {
+                    accountAvatar.src = "images/other/user.png";
+                }
+                
+                // Format dates properly
+                try {
+                    // Handle createdAt date (Join date)
+                    if (profile.createdAt) {
+                        let joinDate;
+                        if (typeof profile.createdAt.toDate === 'function') {
+                            joinDate = profile.createdAt.toDate();
+                        } else if (profile.createdAt.seconds) {
+                            // Handle Firestore timestamp format
+                            joinDate = new Date(profile.createdAt.seconds * 1000);
+                        } else if (profile.createdAt instanceof Date) {
+                            joinDate = profile.createdAt;
+                        }
+                        
+                        if (joinDate) {
+                            accountJoined.textContent = joinDate.toLocaleDateString();
+                        } else {
+                            accountJoined.textContent = "Unknown";
+                        }
+                    } else {
+                        accountJoined.textContent = "Unknown";
+                    }
+                    
+                    // Handle lastLogin date
+                    if (profile.lastLogin) {
+                        let loginDate;
+                        if (typeof profile.lastLogin.toDate === 'function') {
+                            loginDate = profile.lastLogin.toDate();
+                        } else if (profile.lastLogin.seconds) {
+                            // Handle Firestore timestamp format
+                            loginDate = new Date(profile.lastLogin.seconds * 1000);
+                        } else if (profile.lastLogin instanceof Date) {
+                            loginDate = profile.lastLogin;
+                        }
+                        
+                        if (loginDate) {
+                            accountLastLogin.textContent = loginDate.toLocaleDateString();
+                        } else {
+                            accountLastLogin.textContent = "Unknown";
+                        }
+                    } else {
+                        accountLastLogin.textContent = "Unknown";
+                    }
+                } catch (error) {
+                    console.error("Error formatting dates:", error);
+                    accountJoined.textContent = "Unknown";
+                    accountLastLogin.textContent = "Unknown";
+                }
+            }
+            
+            // Update favorite games list
+            function updateFavoriteGames() {
+                // First check if we can load from Firestore
+                if (db && userId) {
+                    // Try to get favorites from Firestore first
+                    db.collection('userProfiles').doc(userId).get()
+                        .then(doc => {
+                            if (doc.exists && doc.data().pinnedGames && doc.data().pinnedGames.length > 0) {
+                                const firebasePinnedGames = doc.data().pinnedGames;
+                                // Save to localStorage for backup
+                                localStorage.setItem("pinnedGames", JSON.stringify(firebasePinnedGames));
+                                renderFavoriteGames(firebasePinnedGames);
+                                console.log("Loaded favorite games from Firestore");
+                            } else {
+                                // Fallback to localStorage
+                                const localPinnedGames = JSON.parse(localStorage.getItem("pinnedGames")) || [];
+                                renderFavoriteGames(localPinnedGames);
+                                console.log("No favorites in Firestore, used localStorage");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error loading favorites from Firestore:", error);
+                            // Fallback to localStorage
+                            const localPinnedGames = JSON.parse(localStorage.getItem("pinnedGames")) || [];
+                            renderFavoriteGames(localPinnedGames);
+                        });
+                } else {
+                    // Fallback to localStorage
+                    const localPinnedGames = JSON.parse(localStorage.getItem("pinnedGames")) || [];
+                    renderFavoriteGames(localPinnedGames);
+                    console.log("Used localStorage for favorite games");
+                }
+            }
+            
+            // Function to render the favorite games UI
+            function renderFavoriteGames(pinnedGames) {
+                if (!pinnedGames || pinnedGames.length === 0) {
+                    favoriteGames.innerHTML = '<p>No favorite games added yet. You can favorite games by clicking the star icon on the games page.</p>';
+                    return;
+                }
+                
+                let gamesHtml = '';
+                pinnedGames.forEach(game => {
+                    // Extract the image URL from the thumbnail property
+                    let imageUrl = game.thumbnail || '';
+                    
+                    // Handle different thumbnail formats
+                    if (typeof imageUrl === 'string') {
+                        // Check if the thumbnail is already a URL
+                        if (imageUrl.startsWith('url(') && imageUrl.endsWith(')')) {
+                            // Extract URL from CSS url() function
+                            imageUrl = imageUrl.substring(4, imageUrl.length - 1).replace(/['"]/g, '');
+                        }
+                        
+                        // If thumbnail doesn't start with http or /, assume it's a relative path
+                        if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+                            // Attempt to fix the path
+                            if (!imageUrl.startsWith('../')) {
+                                imageUrl = '../' + imageUrl;
+                            }
+                        }
+                    } else {
+                        // If thumbnail is not a string, use placeholder
+                        imageUrl = 'images/other/controller.png';
+                    }
+                    
+                    // Format the game link
+                    let gameLink = game.link || '#';
+                    
+                    // Make sure link is properly formed
+                    if (!gameLink.startsWith('http') && !gameLink.startsWith('/')) {
+                        gameLink = '/' + gameLink;
+                    }
+                    
+                    gamesHtml += `
+                        <div class="favorite-game">
+                            <a href="${gameLink}" target="_blank">
+                                <img src="${imageUrl}" alt="${game.name}" onerror="this.src='images/other/controller.png';">
+                                <p class="favorite-game-name">${game.name}</p>
+                            </a>
+                        </div>
+                    `;
+                });
+                
+                favoriteGames.innerHTML = gamesHtml;
+            }
+            
+            // Update friends list
+            function updateFriendsList(friends) {
+                if (!friends.length) {
+                    friendsList.innerHTML = '<p>Friends feature coming soon.</p>';
+                    return;
+                }
+                
+                let friendsHtml = '';
+                friends.forEach(friend => {
+                    friendsHtml += `
+                        <div class="friend-item">
+                            <div class="friend-avatar">
+                                <img src="${friend.avatarUrl || 'images/other/user.png'}" alt="${friend.displayName}" onerror="this.src='images/other/user.png';">
+                            </div>
+                            <div class="friend-info">
+                                <p class="friend-name">${friend.displayName}</p>
+                                <p class="friend-status">${friend.status || 'Offline'}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                friendsList.innerHTML = friendsHtml;
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // Load user data (not async function, so don't use catch directly)
+                try {
+                    loadAccountData();
+                } catch (error) {
+                    console.error("Error loading user data:", error);
+                }
+                
+                // Make sure the edit account button works
+                const editBtn = document.getElementById('editAccountButton');
+                if (editBtn) {
+                    editBtn.addEventListener('click', function() {
+                        console.log('Edit button clicked from DOMContentLoaded');
+                        window.location.href = 'edit-account.html';
+                    });
+                }
+                
+                // Rest of the initialization code
+                
+                // Add success messages based on redirects
+                // Check if redirected after profile update
+                if (localStorage.getItem('profileUpdated') === 'true') {
+                    // Show success message
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'success-message';
+                    successDiv.style.padding = '10px';
+                    successDiv.style.backgroundColor = 'rgba(0, 128, 0, 0.1)';
+                    successDiv.style.borderRadius = '5px';
+                    successDiv.style.marginBottom = '15px';
+                    successDiv.style.textAlign = 'center';
+                    successDiv.style.color = '#55ff55';
+                    successDiv.textContent = 'Profile updated successfully!';
+                    
+                    // Insert at the top of the account container
+                    if (accountContainer && accountContainer.firstChild) {
+                        accountContainer.insertBefore(successDiv, accountContainer.firstChild);
+                    }
+                    
+                    // Remove the flag so message doesn't show again on refresh
+                    localStorage.removeItem('profileUpdated');
+                    
+                    // Remove message after 3 seconds
+                    setTimeout(function() {
+                        if (successDiv.parentNode) {
+                            successDiv.parentNode.removeChild(successDiv);
+                        }
+                    }, 3000);
+                }
+                
+                // Check if redirected after password reset request
+                if (localStorage.getItem('passwordResetRequested') === 'true') {
+                    // Show success message
+                    const resetDiv = document.createElement('div');
+                    resetDiv.className = 'success-message';
+                    resetDiv.style.padding = '10px';
+                    resetDiv.style.backgroundColor = 'rgba(0, 128, 0, 0.1)';
+                    resetDiv.style.borderRadius = '5px';
+                    resetDiv.style.marginBottom = '15px';
+                    resetDiv.style.textAlign = 'center';
+                    resetDiv.style.color = '#55ff55';
+                    resetDiv.textContent = 'Password reset email sent to your registered email address!';
+                    
+                    // Insert at the top of the account container
+                    if (accountContainer && accountContainer.firstChild) {
+                        accountContainer.insertBefore(resetDiv, accountContainer.firstChild);
+                    }
+                    
+                    // Remove the flag so message doesn't show again on refresh
+                    localStorage.removeItem('passwordResetRequested');
+                    
+                    // Remove message after 3 seconds
+                    setTimeout(function() {
+                        if (resetDiv.parentNode) {
+                            resetDiv.parentNode.removeChild(resetDiv);
+                        }
+                    }, 3000);
+                }
+            });
+        </script>
+        
+        <script src="/storage/js/cloak.js"></script>
+        <script src="/storage/js/theme.js"></script>
+        <script src="/storage/js/cookie.js"></script>
+        <script src="/storage/js/auth.js"></script>
+    </body>
+</html> 

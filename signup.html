@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <!-- Vercel Analytics and Speed Insights -->
+        <script defer src="/_vercel/insights/script.js"></script>
+        <script defer src="/_vercel/speed-insights/script.js"></script>
+        
         <script async src="https://www.googletagmanager.com/gtag/js?id=GTM-NX2QKP76"></script>
         <script>
           window.dataLayer = window.dataLayer || [];
@@ -149,6 +153,27 @@
                 display: none;
             }
             
+            /* Styling for country code select */
+            .form-group select {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+                border: 2px solid var(--border-color2);
+                border-radius: 8px;
+                background-color: rgba(0, 0, 0, 0.2);
+                color: var(--text-color);
+                font-family: var(--font-family);
+                box-sizing: border-box;
+                transition: border-color 0.2s, background-color 0.2s;
+                appearance: auto; /* Keep default dropdown arrow */
+            }
+            
+            .form-group select:focus {
+                outline: none;
+                border-color: var(--hover-color);
+                background-color: rgba(0, 0, 0, 0.3);
+            }
+            
             .footer-links {
                 position: absolute;
                 bottom: 20px;
@@ -186,14 +211,10 @@
                   <span>or</span>
               </div>
               
-              <button class="auth-button google-button" id="googleSignupButton">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo">
-                  Sign up with Google
-              </button>
+              <button class="auth-button" id="guestLoginButton">Continue as Guest</button>
               
               <div class="auth-footer">
                   <p>Already have an account? <a href="login.html">Login</a></p>
-                  <p>Continue as <a href="#" id="guestLoginButton">Guest</a></p>
               </div>
           </div>
 
@@ -202,259 +223,81 @@
           </div>
       </div>
 
+      <!-- Add reCAPTCHA for phone auth -->
+      <script src="https://www.google.com/recaptcha/api.js"></script>
+      
       <!-- Firebase SDK -->
-      <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-        import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { runFirebaseDiagnostics } from "./storage/js/firebase-diagnostic.js";
-        
-        // Direct Firebase configuration - no encryption
-        const firebaseConfig = {
-            apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
-            authDomain: "vexplay-33e9f.firebaseapp.com",
-            projectId: "vexplay-33e9f",
-            storageBucket: "vexplay-33e9f.firebasestorage.app",
-            messagingSenderId: "797854431681",
-            appId: "1:797854431681:web:b09b88437937b9fc551740",
-            measurementId: "G-KRWYW4Z4Y3"
-        };
+      <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-auth-compat.js"></script>
 
-        // Initialize Firebase with retry mechanism
-        let app, auth, provider;
-        
-        try {
-            app = initializeApp(firebaseConfig);
-            const analytics = getAnalytics(app);
-            auth = getAuth(app);
-            provider = new GoogleAuthProvider();
-        } catch (error) {
-            // Handle Firebase initialization error
-            console.error("Firebase initialization error:", error);
-            const errorElement = document.getElementById('signupError');
-            errorElement.textContent = "Connection to authentication service failed. Please try again later.";
-            errorElement.style.display = "block";
-            
-            // Add retry button in case of Firebase initialization error
-            const retryButton = document.createElement('button');
-            retryButton.textContent = "Retry Connection";
-            retryButton.className = "auth-button";
-            retryButton.style.marginTop = "15px";
-            errorElement.parentNode.insertBefore(retryButton, errorElement.nextSibling);
-            
-            retryButton.addEventListener('click', () => {
-                window.location.reload();
-            });
-            
-            // Add diagnose button for further troubleshooting
-            const diagnoseButton = document.createElement('button');
-            diagnoseButton.textContent = "Run Diagnostics";
-            diagnoseButton.className = "auth-button";
-            diagnoseButton.style.marginTop = "10px";
-            diagnoseButton.style.marginBottom = "10px";
-            retryButton.parentNode.insertBefore(diagnoseButton, retryButton.nextSibling);
-            
-            diagnoseButton.addEventListener('click', async () => {
-                diagnoseButton.textContent = "Running Diagnostics...";
-                diagnoseButton.disabled = true;
-                
-                // Show diagnostic progress
-                const diagnosticResultsElem = document.createElement('div');
-                diagnosticResultsElem.id = 'diagnostic-results';
-                diagnosticResultsElem.style.marginTop = '15px';
-                diagnosticResultsElem.style.textAlign = 'left';
-                diagnosticResultsElem.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
-                diagnosticResultsElem.style.padding = '10px';
-                diagnosticResultsElem.style.borderRadius = '5px';
-                diagnosticResultsElem.style.fontSize = '14px';
-                diagnosticResultsElem.style.whiteSpace = 'pre-line';
-                diagnosticResultsElem.textContent = "Running diagnostics, please wait...";
-                
-                retryButton.parentNode.insertBefore(diagnosticResultsElem, diagnoseButton.nextSibling);
-                
-                try {
-                    // Run diagnostics with the API key
-                    const results = await runFirebaseDiagnostics(firebaseConfig.apiKey);
-                    
-                    // Display diagnostic results
-                    diagnosticResultsElem.innerHTML = `
-                        <strong>Diagnostic Results:</strong>
-                        <br>
-                        Browser Compatible: ${results.browserCompatible ? '✅' : '❌'}
-                        <br>
-                        Network Connection: ${results.googleConnectivity ? '✅' : '❌'}
-                        <br>
-                        Firebase SDK: ${results.firebaseSDKLoaded ? '✅' : '❌'}
-                        <br>
-                        Content Blockers: ${results.noContentBlockers ? '✅ None detected' : '❌ Detected'}
-                        <br>
-                        API Key Valid: ${results.apiKeyValid ? '✅' : '❌'}
-                        <br>
-                        Storage Permissions: ${results.storagePermissionsGranted ? '✅' : '❌'}
-                        <br><br>
-                        <strong>Recommendations:</strong>
-                        <br>
-                        ${results.recommendations}
-                    `;
-                } catch (error) {
-                    diagnosticResultsElem.textContent = `Error running diagnostics: ${error.message}`;
-                } finally {
-                    diagnoseButton.textContent = "Run Diagnostics";
-                    diagnoseButton.disabled = false;
-                }
-            });
-        }
-
-        // Network status listener
-        window.addEventListener('online', () => {
-            const errorElement = document.getElementById('signupError');
-            if (errorElement.textContent.includes('connection') || errorElement.textContent.includes('network')) {
-                errorElement.textContent = "Connection restored. You can try signing up now.";
-                errorElement.style.color = "#4BB543";
-                errorElement.style.backgroundColor = "rgba(75, 181, 67, 0.1)";
-                setTimeout(() => {
-                    errorElement.style.display = "none";
-                }, 3000);
-            }
-        });
-
-        // Email signup
-        document.getElementById('signupButton').addEventListener('click', () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const errorElement = document.getElementById('signupError');
-            
-            if (!email || !password || !confirmPassword) {
-                errorElement.textContent = "Please fill in all fields";
-                errorElement.style.display = "block";
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                errorElement.textContent = "Passwords do not match";
-                errorElement.style.display = "block";
-                return;
-            }
-            
-            if (password.length < 6) {
-                errorElement.textContent = "Password must be at least 6 characters";
-                errorElement.style.display = "block";
-                return;
-            }
-            
-            // Check for internet connection
-            if (!navigator.onLine) {
-                errorElement.textContent = "No internet connection. Please check your network and try again.";
-                errorElement.style.display = "block";
-                return;
-            }
-            
-            // Show loading message
-            errorElement.textContent = "Creating account...";
-            errorElement.style.color = "#ffffff";
-            errorElement.style.backgroundColor = "rgba(0, 150, 255, 0.1)";
-            errorElement.style.display = "block";
-            
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // Signup successful
-                    const user = userCredential.user;
-                    localStorage.setItem('userLoggedIn', 'true');
-                    localStorage.setItem('userEmail', user.email);
-                    localStorage.setItem('userId', user.uid);
-                    localStorage.setItem('isGuest', 'false');
-                    window.location.href = 'index.html';
-                })
-                .catch((error) => {
-                    // Reset error styling
-                    errorElement.style.color = "#ff6b6b";
-                    errorElement.style.backgroundColor = "rgba(255, 107, 107, 0.1)";
-                    
-                    // Handle errors
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    console.error(errorCode, errorMessage);
-                    
-                    if (errorCode === 'auth/email-already-in-use') {
-                        errorElement.textContent = "Email already in use";
-                    } else if (errorCode === 'auth/invalid-email') {
-                        errorElement.textContent = "Invalid email address";
-                    } else if (errorCode === 'auth/weak-password') {
-                        errorElement.textContent = "Password is too weak";
-                    } else if (errorCode === 'auth/network-request-failed') {
-                        errorElement.textContent = "Network connection error. Please check your internet connection and try again.";
-                    } else {
-                        errorElement.textContent = "Signup failed: " + errorMessage;
-                    }
-                    
-                    errorElement.style.display = "block";
-                });
-        });
-        
-        // Google signup
-        document.getElementById('googleSignupButton').addEventListener('click', () => {
-            const errorElement = document.getElementById('signupError');
-            
-            // Check for internet connection
-            if (!navigator.onLine) {
-                errorElement.textContent = "No internet connection. Please check your network and try again.";
-                errorElement.style.display = "block";
-                return;
-            }
-            
-            // Show loading message
-            errorElement.textContent = "Connecting to Google...";
-            errorElement.style.color = "#ffffff";
-            errorElement.style.backgroundColor = "rgba(0, 150, 255, 0.1)";
-            errorElement.style.display = "block";
-            
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    // Google signup successful
-                    const user = result.user;
-                    localStorage.setItem('userLoggedIn', 'true');
-                    localStorage.setItem('userEmail', user.email);
-                    localStorage.setItem('userId', user.uid);
-                    localStorage.setItem('isGuest', 'false');
-                    window.location.href = 'index.html';
-                })
-                .catch((error) => {
-                    // Reset error styling
-                    errorElement.style.color = "#ff6b6b";
-                    errorElement.style.backgroundColor = "rgba(255, 107, 107, 0.1)";
-                    
-                    // Handle errors
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    console.error(errorCode, errorMessage);
-                    
-                    if (errorCode === 'auth/network-request-failed') {
-                        errorElement.textContent = "Network connection error. Please check your internet connection and try again.";
-                    } else {
-                        errorElement.textContent = "Google signup failed: " + errorMessage;
-                    }
-                    
-                    errorElement.style.display = "block";
-                });
-        });
-        
-        // Guest login - no Firebase, just use localStorage
-        document.getElementById('guestLoginButton').addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            // Set guest status in localStorage without using Firebase
-            localStorage.setItem('userLoggedIn', 'true');
-            localStorage.setItem('isGuest', 'true');
-            localStorage.setItem('userEmail', 'guest');
-            localStorage.setItem('userId', 'guest-' + Math.random().toString(36).substring(2, 15));
-            window.location.href = 'index.html';
-        });
+      <script>
+          // Initialize Firebase
+          const firebaseConfig = {
+              apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+              authDomain: "vexplay-33e9f.firebaseapp.com",
+              projectId: "vexplay-33e9f",
+              storageBucket: "vexplay-33e9f.firebasestorage.app",
+              messagingSenderId: "797854431681",
+              appId: "1:797854431681:web:b09b88437937b9fc551740",
+              measurementId: "G-KRWYW4Z4Y3"
+          };
+          
+          // Initialize Firebase
+          firebase.initializeApp(firebaseConfig);
+          
+          // Handle signup form submission
+          document.getElementById('signupButton').addEventListener('click', function() {
+              const email = document.getElementById('email').value;
+              const password = document.getElementById('password').value;
+              const confirmPassword = document.getElementById('confirmPassword').value;
+              const errorDiv = document.getElementById('signupError');
+              
+              if (!email || !password || !confirmPassword) {
+                  errorDiv.textContent = 'Please fill in all fields';
+                  errorDiv.style.display = 'block';
+                  return;
+              }
+              
+              if (password !== confirmPassword) {
+                  errorDiv.textContent = 'Passwords do not match';
+                  errorDiv.style.display = 'block';
+                  return;
+              }
+              
+              // Clear any previous errors
+              errorDiv.style.display = 'none';
+              
+              // Create user with email and password
+              firebase.auth().createUserWithEmailAndPassword(email, password)
+                  .then((userCredential) => {
+                      // User created successfully
+                      const user = userCredential.user;
+                      localStorage.setItem('userLoggedIn', 'true');
+                      localStorage.setItem('userEmail', user.email);
+                      localStorage.setItem('userId', user.uid);
+                      localStorage.setItem('isGuest', 'false');
+                      
+                      // Redirect to account setup page
+                      window.location.href = '/account-setup.html';
+                  })
+                  .catch((error) => {
+                      console.error("Signup error:", error);
+                      errorDiv.textContent = 'Signup failed: ' + error.message;
+                      errorDiv.style.display = 'block';
+                  });
+          });
+          
+          // Guest login
+          document.getElementById('guestLoginButton').addEventListener('click', function() {
+              localStorage.setItem('userLoggedIn', 'true');
+              localStorage.setItem('isGuest', 'true');
+              
+              // Redirect to home
+              window.location.href = '/index.html';
+          });
       </script>
       
-      <script src="storage/js/cloak.js"></script>
-      <script src="storage/js/theme.js"></script>
-      <script src="storage/js/cookie.js"></script>
+      <script src="/storage/js/cloak.js"></script>
+      <script src="/storage/js/theme.js"></script>
   </body>
 </html> 

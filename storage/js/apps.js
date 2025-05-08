@@ -17,6 +17,19 @@ function filterGames() {
 
 document.getElementById('search').addEventListener('input', filterGames);
 
+// Add keyboard shortcut for search (press '/' to focus search)
+document.addEventListener('keydown', function(e) {
+    // Don't trigger if already in an input field
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && 
+        document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault(); // Prevent typing '/' in any input field
+        const searchInput = document.getElementById('search');
+        if (searchInput) {
+            searchInput.focus();
+        }
+    }
+});
+
 // open blank script
 document.addEventListener('DOMContentLoaded', function() {
     var openBlankLink = document.getElementById('openBlankLink');

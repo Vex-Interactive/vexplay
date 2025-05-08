@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Vercel Analytics and Speed Insights -->
+        <script defer src="/_vercel/insights/script.js"></script>
+        <script defer src="/_vercel/speed-insights/script.js"></script>
+        
+        <script async src="https://www.googletagmanager.com/gtag/js?id=GTM-NX2QKP76"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-7FN7LEVWXD');
+        </script>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="/images/ico.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/storage/css/index.css">
+        <title>User Profile | Vexplay</title>
+
+        <meta name="description" content="View user profile on Vexplay">
+        <meta property="og:site_name" content="Vexplay">
+        <meta property="og:title" content="Vexplay User Profile">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="View user profile on Vexplay">
+        
+        <style>
+            body {
+                background-color: var(--background-color);
+                color: var(--text-color);
+                font-family: var(--font-family, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+                padding: 0;
+                margin: 0;
+                background-image: linear-gradient(to bottom right, rgba(30, 30, 30, 0.8), rgba(20, 20, 20, 0.9)), url('/images/other/bg.png');
+                background-size: cover;
+                background-attachment: fixed;
+            }
+            
+            .page-container {
+                max-width: 1000px;
+                margin: 0 auto;
+                padding: 20px;
+                position: relative;
+            }
+            
+            .account-container {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 25px;
+                border: 3px solid var(--border-color2);
+                border-radius: 16px;
+                background-color: rgba(15, 15, 15, 0.85);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(5px);
+                transition: all 0.3s ease;
+            }
+            
+            .account-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 25px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid var(--border-color2);
+            }
+            
+            .account-avatar {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                overflow: hidden;
+                margin-right: 25px;
+                border: 3px solid var(--border-color2);
+                background-color: rgba(0, 0, 0, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 48px;
+                color: var(--text-color);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+                transition: transform 0.3s ease;
+            }
+            
+            .account-avatar:hover {
+                transform: scale(1.05);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            }
+            
+            .account-avatar img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+            .account-name-section {
+                flex: 1;
+            }
+            
+            .account-name {
+                font-size: 32px;
+                margin: 0 0 8px 0;
+                display: flex;
+                align-items: center;
+                text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+            
+            .account-email {
+                font-size: 18px;
+                opacity: 0.7;
+                margin: 0;
+            }
+            
+            .account-section {
+                margin-bottom: 30px;
+                padding: 25px;
+                border: 2px solid var(--border-color2);
+                border-radius: 12px;
+                background-color: rgba(0, 0, 0, 0.2);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            
+            .account-section:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            }
+            
+            .account-section-title {
+                font-size: 22px;
+                margin: 0 0 20px 0;
+                padding-bottom: 12px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                position: relative;
+            }
+            
+            .account-section-title::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 50px;
+                height: 3px;
+                background-color: var(--primary-color, #4a90e2);
+            }
+            
+            .account-detail-item {
+                display: flex;
+                margin-bottom: 15px;
+                padding: 8px 0;
+                border-bottom: 1px dotted rgba(255, 255, 255, 0.05);
+                transition: background-color 0.2s ease;
+            }
+            
+            .account-detail-item:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+                border-radius: 4px;
+            }
+            
+            .account-detail-label {
+                width: 150px;
+                opacity: 0.7;
+                font-weight: bold;
+                color: var(--primary-color, #4a90e2);
+            }
+            
+            .account-detail-value {
+                flex: 1;
+            }
+            
+            .favorite-games {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+            
+            .favorite-game {
+                padding: 15px;
+                border: 1px solid var(--border-color2);
+                border-radius: 10px;
+                text-align: center;
+                background-color: rgba(0, 0, 0, 0.3);
+                transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+                overflow: hidden;
+            }
+            
+            .favorite-game:hover {
+                transform: translateY(-8px) scale(1.02);
+                background-color: rgba(0, 0, 0, 0.4);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            }
+            
+            .favorite-game a {
+                text-decoration: none;
+                color: var(--text-color);
+                display: block;
+            }
+            
+            .favorite-game img {
+                width: 100%;
+                height: 120px;
+                object-fit: cover;
+                border-radius: 6px;
+                margin-bottom: 10px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+                transition: transform 0.3s ease;
+            }
+            
+            .favorite-game:hover img {
+                transform: scale(1.05);
+            }
+            
+            .favorite-game-name {
+                font-size: 16px;
+                margin: 10px 0 0 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                font-weight: bold;
+            }
+            
+            .friend-list {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+            
+            .friend-item {
+                display: flex;
+                align-items: center;
+                padding: 15px;
+                border: 1px solid var(--border-color2);
+                border-radius: 10px;
+                background-color: rgba(0, 0, 0, 0.2);
+                transition: all 0.3s ease;
+            }
+            
+            .friend-item:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                background-color: rgba(0, 0, 0, 0.3);
+            }
+            
+            .friend-avatar {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                margin-right: 15px;
+                overflow: hidden;
+                border: 2px solid var(--border-color2);
+            }
+            
+            .friend-avatar img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            
+            .friend-info {
+                flex: 1;
+            }
+            
+            .friend-name {
+                font-size: 16px;
+                margin: 0 0 5px 0;
+                font-weight: bold;
+            }
+            
+            .friend-status {
+                font-size: 14px;
+                opacity: 0.7;
+                margin: 3px 0 0 0;
+            }
+            
+            .login-prompt {
+                text-align: center;
+                padding: 40px 20px;
+                font-size: 18px;
+            }
+            
+            .error-container {
+                padding: 40px 20px;
+                text-align: center;
+                color: var(--text-color);
+                max-width: 600px;
+                margin: 30px auto;
+                background-color: rgba(0, 0, 0, 0.3);
+                border: 2px solid rgba(255, 0, 0, 0.3);
+                border-radius: 16px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            }
+            
+            .error-container h2 {
+                margin-bottom: 15px;
+                font-size: 24px;
+                color: #ff5555;
+            }
+            
+            .error-container p {
+                margin-bottom: 20px;
+                opacity: 0.8;
+                line-height: 1.5;
+            }
+            
+            .button {
+                display: inline-block;
+                padding: 12px 24px;
+                background-color: var(--primary-color, #4a90e2);
+                border: 2px solid var(--border-color2);
+                border-radius: 8px;
+                color: white;
+                text-decoration: none;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-weight: bold;
+                font-family: inherit;
+            }
+            
+            .button:hover {
+                background-color: var(--hover-color);
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+            
+            .badge {
+                display: inline-block;
+                font-size: 12px;
+                padding: 3px 10px;
+                border-radius: 20px;
+                background-color: var(--primary-color, #4a90e2);
+                color: white;
+                margin-left: 10px;
+                vertical-align: middle;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+            
+            .loader {
+                text-align: center;
+                padding: 50px;
+                max-width: 600px;
+                margin: 30px auto;
+                background-color: rgba(0, 0, 0, 0.2);
+                border-radius: 16px;
+                border: 2px solid var(--border-color2);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            }
+            
+            .loader-animation {
+                display: inline-block;
+                width: 60px;
+                height: 60px;
+                border: 5px solid rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                border-top-color: var(--primary-color, #4a90e2);
+                animation: spin 1s ease-in-out infinite;
+                margin-bottom: 20px;
+            }
+            
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+            
+            .message {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+                margin: 30px 0;
+                padding: 15px;
+                background-color: rgba(0, 0, 0, 0.2);
+                border-radius: 10px;
+                border: 1px solid var(--border-color2);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+            
+            .message-icon {
+                font-size: 28px;
+            }
+            
+            .message-text {
+                font-size: 16px;
+                opacity: 0.8;
+                line-height: 1.5;
+            }
+            
+            /* Profile ID search form */
+            .profile-search-container {
+                max-width: 600px;
+                margin: 30px auto;
+                padding: 30px;
+                border: 3px solid var(--border-color2);
+                border-radius: 16px;
+                background-color: rgba(15, 15, 15, 0.85);
+                text-align: center;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(5px);
+                transition: transform 0.3s ease;
+            }
+            
+            .profile-search-container:hover {
+                transform: translateY(-5px);
+            }
+            
+            .profile-search-title {
+                font-size: 28px;
+                margin-bottom: 20px;
+                position: relative;
+                display: inline-block;
+                text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+            
+            .profile-search-title::after {
+                content: '';
+                position: absolute;
+                bottom: -8px;
+                left: 0;
+                width: 100%;
+                height: 3px;
+                background-color: var(--primary-color, #4a90e2);
+                border-radius: 3px;
+            }
+            
+            .profile-search-form {
+                display: flex;
+                gap: 10px;
+                margin: 25px 0;
+            }
+            
+            .profile-search-input {
+                flex: 1;
+                padding: 15px 20px;
+                background-color: rgba(0, 0, 0, 0.3);
+                border: 2px solid var(--border-color2);
+                border-radius: 10px;
+                color: var(--text-color);
+                font-size: 16px;
+                font-family: inherit;
+                transition: all 0.3s ease;
+            }
+            
+            .profile-search-input:focus {
+                outline: none;
+                border-color: var(--primary-color, #4a90e2);
+                box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+            }
+            
+            .profile-search-button {
+                padding: 0 30px;
+                background-color: var(--primary-color, #4a90e2);
+                color: white;
+                border: 2px solid var(--border-color2);
+                border-radius: 10px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                font-family: inherit;
+                font-size: 16px;
+            }
+            
+            .profile-search-button:hover {
+                background-color: var(--hover-color);
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+            
+            .profile-search-description {
+                font-size: 15px;
+                opacity: 0.7;
+                margin: 15px 0;
+                line-height: 1.6;
+            }
+            
+            .back-link {
+                display: inline-block;
+                margin: 20px 0;
+                padding: 10px 20px;
+                background-color: rgba(0, 0, 0, 0.3);
+                border: 2px solid var(--border-color2);
+                border-radius: 10px;
+                color: var(--text-color);
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-weight: bold;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            }
+            
+            .back-link:hover {
+                background-color: var(--hover-color);
+                transform: translateX(-5px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+            
+            /* Stats section */
+            .stat-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-top: 15px;
+            }
+            
+            .stat-item {
+                flex: 1;
+                min-width: 120px;
+                padding: 15px;
+                background-color: rgba(0, 0, 0, 0.2);
+                border-radius: 8px;
+                text-align: center;
+                transition: all 0.3s ease;
+            }
+            
+            .stat-item:hover {
+                transform: translateY(-5px);
+                background-color: rgba(0, 0, 0, 0.3);
+            }
+            
+            .stat-value {
+                font-size: 24px;
+                font-weight: bold;
+                color: var(--primary-color, #4a90e2);
+                margin-bottom: 5px;
+            }
+            
+            .stat-label {
+                font-size: 14px;
+                opacity: 0.7;
+            }
+            
+            /* Responsive design */
+            @media (max-width: 768px) {
+                .account-header {
+                    flex-direction: column;
+                    text-align: center;
+                }
+                
+                .account-avatar {
+                    margin: 0 auto 20px;
+                }
+                
+                .account-detail-item {
+                    flex-direction: column;
+                }
+                
+                .account-detail-label {
+                    width: 100%;
+                    margin-bottom: 5px;
+                }
+                
+                .favorite-games {
+                    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                }
+                
+                .profile-search-form {
+                    flex-direction: column;
+                }
+                
+                .profile-search-button {
+                    padding: 15px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <a href="index.html" class="back-link">← Back to Home</a>
+        
+        <!-- Profile Search Form -->
+        <div class="profile-search-container" id="profileSearchContainer">
+            <h2 class="profile-search-title">Find a User</h2>
+            <p class="profile-search-description">Enter a user ID to view their profile</p>
+            
+            <form class="profile-search-form" id="profileSearchForm">
+                <input type="text" class="profile-search-input" id="userIdInput" placeholder="Enter User ID" required>
+                <button type="submit" class="profile-search-button">Search</button>
+            </form>
+            
+            <p class="profile-search-description">
+                You can find user IDs in the search results on the homepage or by asking users to share their ID
+            </p>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loader" style="display:none;">
+            <div class="loader-animation"></div>
+            <p>Loading user profile...</p>
+        </div>
+        
+        <!-- Error Message Container -->
+        <div id="errorContainer" class="error-container" style="display:none;">
+            <h2>User Not Found</h2>
+            <p id="errorMessage">The user profile you're looking for could not be found.</p>
+            <button class="button" onclick="location.reload()">Try Again</button>
+        </div>
+        
+        <!-- User Profile Container -->
+        <div id="userProfileContainer" class="account-container" style="display:none;">
+            <div class="account-header">
+                <div class="account-avatar" id="userAvatar">
+                    <!-- Avatar image or initial will be inserted here -->
+                </div>
+                <div class="account-name-section">
+                    <h1 class="account-name" id="displayName">
+                        <!-- Display name will be inserted here -->
+                        <span class="badge" id="userBadge"></span>
+                    </h1>
+                    <p class="account-email" id="userSubtitle">
+                        <!-- User ID or other subtitle will be inserted here -->
+                    </p>
+                </div>
+            </div>
+            
+            <div class="account-section">
+                <h2 class="account-section-title">About</h2>
+                <div class="account-detail-item">
+                    <div class="account-detail-label">Member Since</div>
+                    <div class="account-detail-value" id="memberSince">-</div>
+                </div>
+                <div class="account-detail-item">
+                    <div class="account-detail-label">Last Seen</div>
+                    <div class="account-detail-value" id="lastSeen">-</div>
+                </div>
+            </div>
+            
+            <div class="account-section">
+                <h2 class="account-section-title">Favorite Games</h2>
+                <div id="favoriteGames" class="favorite-games">
+                    <!-- Favorite games will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="message" id="messageContainer" style="display:none;">
+                <div class="message-icon">ℹ️</div>
+                <div class="message-text" id="messageText"></div>
+            </div>
+        </div>
+        
+        <script src="/storage/js/cloak.js"></script>
+        <script src="/storage/js/theme.js"></script>
+        <script src="/storage/js/cookie.js"></script>
+        
+        <!-- Firebase SDK -->
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-auth-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore-compat.js"></script>
+        
+        <script>
+            // Initialize Firebase
+            const firebaseConfig = {
+                apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+                authDomain: "vexplay-33e9f.firebaseapp.com",
+                projectId: "vexplay-33e9f",
+                storageBucket: "vexplay-33e9f.firebasestorage.app",
+                messagingSenderId: "797854431681",
+                appId: "1:797854431681:web:b09b88437937b9fc551740",
+                measurementId: "G-KRWYW4Z4Y3"
+            };
+            
+            // Initialize Firebase if not already initialized
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+                console.log("Firebase initialized");
+            }
+            
+            // References to Firebase services
+            const auth = firebase.auth();
+            const db = firebase.firestore();
+            
+            // DOM Elements
+            const profileSearchContainer = document.getElementById('profileSearchContainer');
+            const profileSearchForm = document.getElementById('profileSearchForm');
+            const userIdInput = document.getElementById('userIdInput');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorContainer = document.getElementById('errorContainer');
+            const errorMessage = document.getElementById('errorMessage');
+            const userProfileContainer = document.getElementById('userProfileContainer');
+            const userAvatar = document.getElementById('userAvatar');
+            const displayName = document.getElementById('displayName');
+            const userBadge = document.getElementById('userBadge');
+            const userSubtitle = document.getElementById('userSubtitle');
+            const memberSince = document.getElementById('memberSince');
+            const lastSeen = document.getElementById('lastSeen');
+            const favoriteGames = document.getElementById('favoriteGames');
+            const messageContainer = document.getElementById('messageContainer');
+            const messageText = document.getElementById('messageText');
+            
+            // Check for userId in URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const userIdParam = urlParams.get('id');
+            
+            // If userId is provided in URL, fetch and display profile
+            if (userIdParam) {
+                fetchUserProfile(userIdParam);
+            }
+            
+            // Handle profile search form submission
+            profileSearchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const userId = userIdInput.value.trim();
+                if (userId) {
+                    // Redirect to same page with userId as parameter
+                    window.location.href = `user-profile.html?id=${encodeURIComponent(userId)}`;
+                }
+            });
+            
+            // Function to fetch and display user profile
+            function fetchUserProfile(userId) {
+                // Hide search form and show loading indicator
+                profileSearchContainer.style.display = 'none';
+                loadingIndicator.style.display = 'block';
+                
+                // Check if current user is viewing their own profile
+                const currentUserId = localStorage.getItem('userId');
+                const isOwnProfile = currentUserId === userId;
+                
+                // First try to get from Firestore
+                db.collection('userProfiles').doc(userId).get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            // User found, display profile
+                            const userData = doc.data();
+                            
+                            // If it's the current user, try to get auth information
+                            if (isOwnProfile && auth.currentUser) {
+                                // Add creation date from auth if available
+                                const creationTime = auth.currentUser.metadata.creationTime;
+                                userData.authCreatedAt = creationTime ? new Date(creationTime) : null;
+                            }
+                            
+                            displayUserProfile(userId, userData, isOwnProfile);
+                        } else {
+                            // If no document exists but it's the current user, use localStorage data
+                            if (isOwnProfile) {
+                                const localUserData = {
+                                    displayName: localStorage.getItem('displayName'),
+                                    avatarUrl: localStorage.getItem('avatarUrl'),
+                                    email: localStorage.getItem('userEmail')
+                                };
+                                
+                                // Try to get auth creation time
+                                if (auth.currentUser) {
+                                    const creationTime = auth.currentUser.metadata.creationTime;
+                                    localUserData.authCreatedAt = creationTime ? new Date(creationTime) : null;
+                                }
+                                
+                                displayUserProfile(userId, localUserData, true);
+                            } else {
+                                // User not found
+                                showError('The user profile you requested does not exist.');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching user profile:', error);
+                        
+                        // If error occurs but it's the current user, use localStorage as fallback
+                        if (isOwnProfile) {
+                            const localUserData = {
+                                displayName: localStorage.getItem('displayName'),
+                                avatarUrl: localStorage.getItem('avatarUrl'),
+                                email: localStorage.getItem('userEmail')
+                            };
+                            
+                            // Try to get auth creation time
+                            if (auth.currentUser) {
+                                const creationTime = auth.currentUser.metadata.creationTime;
+                                localUserData.authCreatedAt = creationTime ? new Date(creationTime) : null;
+                            }
+                            
+                            displayUserProfile(userId, localUserData, true);
+                        } else {
+                            showError('An error occurred while fetching the user profile. Please try again later.');
+                        }
+                    });
+            }
+            
+            // Function to display user profile
+            function displayUserProfile(userId, userData, isOwnProfile) {
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
+                
+                // Display user avatar
+                if (userData.avatarUrl) {
+                    userAvatar.innerHTML = `<img src="${userData.avatarUrl}" alt="Profile Avatar">`;
+                } else if (userData.displayName) {
+                    // Show first letter of display name
+                    userAvatar.textContent = userData.displayName[0].toUpperCase();
+                } else {
+                    // Default avatar
+                    userAvatar.textContent = '?';
+                }
+                
+                // Display user name and info
+                displayName.textContent = userData.displayName || 'User';
+                
+                // Add badge if it's the current user
+                if (isOwnProfile) {
+                    userBadge.textContent = 'You';
+                    userBadge.style.backgroundColor = 'var(--primary-color, #4a90e2)';
+                    userBadge.style.display = 'inline-block';
+                } else {
+                    userBadge.style.display = 'none';
+                }
+                
+                // Set subtitle (user ID or email)
+                userSubtitle.textContent = userData.email ? `${userData.email.split('@')[0]}@...` : `ID: ${userId}`;
+                
+                // Set member since date - prioritize Auth data over Firestore
+                if (userData.authCreatedAt) {
+                    // Use auth metadata if available
+                    memberSince.textContent = userData.authCreatedAt.toLocaleDateString();
+                } else if (userData.createdAt) {
+                    // Fall back to Firestore data if available
+                    const createdDate = userData.createdAt.toDate ? userData.createdAt.toDate() : new Date(userData.createdAt);
+                    memberSince.textContent = createdDate.toLocaleDateString();
+                } else {
+                    memberSince.textContent = 'Unknown';
+                }
+                
+                // Set last seen date
+                if (userData.lastSeen) {
+                    // Check if lastSeen is a Firebase timestamp or a Date
+                    const lastSeenDate = userData.lastSeen.toDate ? userData.lastSeen.toDate() : new Date(userData.lastSeen);
+                    lastSeen.textContent = lastSeenDate.toLocaleDateString() + ' ' + lastSeenDate.toLocaleTimeString();
+                } else {
+                    lastSeen.textContent = 'Unknown';
+                }
+                
+                // Display favorite games if available
+                if (userData.pinnedGames && userData.pinnedGames.length > 0) {
+                    favoriteGames.innerHTML = ''; // Clear container
+                    
+                    userData.pinnedGames.forEach(game => {
+                        // Handle different thumbnail formats
+                        let imageUrl = game.thumbnail || '';
+                        
+                        // Process the thumbnail URL
+                        if (typeof imageUrl === 'string') {
+                            // Extract URL from CSS url() function if needed
+                            if (imageUrl.startsWith('url(') && imageUrl.endsWith(')')) {
+                                imageUrl = imageUrl.substring(4, imageUrl.length - 1).replace(/['"]/g, '');
+                            }
+                            
+                            // If thumbnail doesn't start with http or /, assume it's a relative path
+                            if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+                                // Attempt to fix the path
+                                if (!imageUrl.startsWith('../')) {
+                                    imageUrl = '../' + imageUrl;
+                                }
+                            }
+                        } else {
+                            // If thumbnail is not a string, use placeholder
+                            imageUrl = '/images/other/controller.png';
+                        }
+                        
+                        // Format the game link
+                        let gameLink = game.link || '#';
+                        
+                        // Make sure link is properly formed
+                        if (!gameLink.startsWith('http') && !gameLink.startsWith('/')) {
+                            gameLink = '/' + gameLink;
+                        }
+                        
+                        const gameElement = document.createElement('div');
+                        gameElement.className = 'favorite-game';
+                        
+                        gameElement.innerHTML = `
+                            <a href="${gameLink}" target="_blank">
+                                <img src="${imageUrl}" alt="${game.name}" onerror="this.src='/images/other/controller.png'">
+                                <h3 class="favorite-game-name">${game.name}</h3>
+                            </a>
+                        `;
+                        
+                        favoriteGames.appendChild(gameElement);
+                    });
+                } else {
+                    favoriteGames.innerHTML = '<p>No favorite games yet</p>';
+                }
+                
+                // Show message for future features
+                messageContainer.style.display = 'flex';
+                messageText.textContent = 'More profile features coming soon!';
+                
+                // Show profile container
+                userProfileContainer.style.display = 'block';
+            }
+            
+            // Function to show error message
+            function showError(message) {
+                loadingIndicator.style.display = 'none';
+                errorMessage.textContent = message;
+                errorContainer.style.display = 'block';
+            }
+            
+            // Get URL parameters
+            function getUrlParameter(name) {
+                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                var results = regex.exec(location.search);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            }
+        </script>
+    </body>
+</html> 

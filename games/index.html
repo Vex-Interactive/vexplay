@@ -1,5 +1,9 @@
 <html lang="en">
     <head>
+        <!-- Vercel Analytics and Speed Insights -->
+        <script defer src="/_vercel/insights/script.js"></script>
+        <script defer src="/_vercel/speed-insights/script.js"></script>
+        
         <script src="/storage/js/premium-unblur.js"></script>
         <script async src="https://www.googletagmanager.com/gtag/js?id=GTM-NX2QKP76"></script>
         <script>
@@ -3877,9 +3881,75 @@
         <script src="/storage/js/cloak.js"></script>
         <script src="/storage/js/theme.js"></script>
         <script src="/storage/js/cookie.js"></script>
+        
+        <!-- Firebase SDK -->
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-auth-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore-compat.js"></script>
+        
+        <!-- Initialize Firebase -->
+        <script>
+            // Initialize Firebase
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBrD_IAs4WIf4ikI-9jdwgH65gXErj8Dv8",
+                    authDomain: "vexplay-33e9f.firebaseapp.com",
+                    projectId: "vexplay-33e9f",
+                    storageBucket: "vexplay-33e9f.firebasestorage.app",
+                    messagingSenderId: "797854431681",
+                    appId: "1:797854431681:web:b09b88437937b9fc551740",
+                    measurementId: "G-KRWYW4Z4Y3"
+                };
+                
+                // Initialize Firebase
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                    console.log("Firebase initialized for games page");
+                }
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+            }
+        </script>
+        
         <script src="/storage/js/games.js"></script>
 
-        
+        <script>
+            // Check for search parameter in URL and apply it automatically
+            document.addEventListener('DOMContentLoaded', function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const searchParam = urlParams.get('search');
+                
+                if (searchParam) {
+                    const searchInput = document.getElementById('search');
+                    if (searchInput) {
+                        searchInput.value = searchParam;
+                        // Trigger the search function
+                        filterGames();
+                        // Scroll to the search input
+                        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Focus the search input
+                        setTimeout(() => searchInput.focus(), 500);
+                    }
+                }
+            });
+        </script>
 
+        <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/offline-worker.js').then(function(registration) {
+                    console.log('service worker initalised! scope:', registration.scope);
+        
+                    navigator.serviceWorker.addEventListener('message', function(event) {
+                        if (event.data === 'cached') {
+                            document.getElementById('cache-status').style.display = 'block';
+                        }
+                    });
+                }, function(error) {
+                    console.log('ack, error with serviceworker! ', error);
+                });
+            });
+        }
+        </script>
   </body>
 </html>

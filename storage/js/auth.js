@@ -36,12 +36,171 @@ function canAccessPremiumApps() {
     return isLoggedIn() && !isGuest();
 }
 
+// Migrate existing accounts to ensure they have display names
+function migrateAccount() {
+    // Only run for logged-in users who aren't guests
+    if (!isLoggedIn() || isGuest()) {
+        return;
+    }
+
+    const userId = getUserId();
+    const userEmail = getUserEmail();
+    
+    if (!userId || !userEmail) {
+        console.error("User ID or email missing for account migration");
+        return;
+    }
+
+    // Check if we already have a display name in localStorage
+    if (localStorage.getItem('displayName')) {
+        console.log("Display name already exists in localStorage, no migration needed");
+        return;
+    }
+    
+    console.log("Starting account migration check for user:", userId);
+    
+    // Create a default display name from the email to use regardless of Firebase availability
+    const defaultDisplayName = userEmail.split('@')[0];
+    
+    // Attempt to save display name in localStorage as a fallback
+    localStorage.setItem('displayName', defaultDisplayName);
+    
+    // Try to wait for Firebase to be available
+    const checkFirebaseAvailability = function() {
+        // Check if Firebase is available
+        if (typeof firebase === 'undefined') {
+            console.warn("Firebase not available yet, will check again");
+            setTimeout(checkFirebaseAvailability, 500);
+            return;
+        }
+        
+        // Check if Firestore is available
+        if (typeof firebase.firestore !== 'function') {
+            console.warn("Firestore not available yet, will check again");
+            setTimeout(checkFirebaseAvailability, 500);
+            return;
+        }
+        
+        // Firebase and Firestore are available, get Firestore reference
+        const db = firebase.firestore();
+        
+        // Check if user already has a profile
+        db.collection('userProfiles').doc(userId).get()
+            .then((doc) => {
+                if (doc.exists && doc.data().displayName) {
+                    // Profile exists, just update localStorage
+                    console.log("Profile found in Firestore, updating localStorage");
+                    localStorage.setItem('displayName', doc.data().displayName);
+                    localStorage.setItem('avatarUrl', doc.data().avatarUrl || '');
+                } else {
+                    // No profile or missing display name, create one
+                    console.log("No profile found, creating default profile");
+                    
+                    // Create default profile
+                    db.collection('userProfiles').doc(userId).set({
+                        displayName: defaultDisplayName,
+                        avatarUrl: '',
+                        setupComplete: true,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        migratedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        migrationSource: 'auto_migration'
+                    }, { merge: true })
+                    .then(() => {
+                        console.log("Default profile created successfully");
+                    })
+                    .catch((error) => {
+                        console.error("Error creating default profile:", error);
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error("Error checking user profile:", error);
+            });
+    };
+    
+    // Start checking for Firebase availability
+    checkFirebaseAvailability();
+}
+
+// Check if user has completed account setup
+function checkAccountSetup() {
+    // Only run for logged-in users who aren't guests
+    if (!isLoggedIn() || isGuest()) {
+        return;
+    }
+
+    const userId = getUserId();
+    if (!userId) {
+        console.error("User ID missing for account setup check");
+        return;
+    }
+    
+    console.log("Checking if user has completed account setup");
+    
+    // Try to wait for Firebase to be available
+    const checkFirebaseAvailability = function() {
+        // Check if Firebase is available
+        if (typeof firebase === 'undefined') {
+            console.warn("Firebase not available yet for setup check, will check again");
+            setTimeout(checkFirebaseAvailability, 500);
+            return;
+        }
+        
+        // Check if Firestore is available
+        if (typeof firebase.firestore !== 'function') {
+            console.warn("Firestore not available yet for setup check, will check again");
+            setTimeout(checkFirebaseAvailability, 500);
+            return;
+        }
+        
+        try {
+            // Firebase and Firestore are available, get Firestore reference
+            const db = firebase.firestore();
+            
+            // Check if user has a complete profile
+            db.collection('userProfiles').doc(userId).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        // Check if setup is complete 
+                        if (!doc.data().setupComplete) {
+                            console.log("User hasn't completed account setup. Redirecting to setup page.");
+                            // Don't redirect if already on the setup page
+                            if (!window.location.pathname.includes('account-setup.html')) {
+                                window.location.href = 'account-setup.html';
+                            }
+                        } else {
+                            console.log("User has completed account setup.");
+                        }
+                    } else {
+                        // No profile document exists, user needs to complete setup
+                        console.log("No user profile found, redirecting to account setup.");
+                        // Don't redirect if already on the setup page
+                        if (!window.location.pathname.includes('account-setup.html')) {
+                            window.location.href = 'account-setup.html';
+                        }
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error checking account setup status:", error);
+                });
+        } catch (error) {
+            console.error("Exception in checkAccountSetup:", error);
+        }
+    };
+    
+    // Start checking for Firebase availability
+    checkFirebaseAvailability();
+}
+
 // Logout function
 function logout() {
     localStorage.removeItem('userLoggedIn');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userId');
     localStorage.removeItem('isGuest');
+    localStorage.removeItem('displayName');
+    localStorage.removeItem('avatarUrl');
     window.location.href = '/index.html';
 }
 
@@ -295,6 +454,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isUrlAllowedForGuests(currentUrl)) {
             window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.href);
         }
+    }
+    
+    // For logged-in non-guest users, check if they need to complete account setup
+    // Skip this check on account-setup.html page to avoid redirect loops
+    if (isLoggedIn() && !isGuest() && !window.location.pathname.includes('account-setup.html')) {
+        checkAccountSetup();
     }
     
     // Add logout button to navigation if user is logged in
