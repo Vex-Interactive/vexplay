@@ -1,6 +1,6 @@
 {
   "name": "vexplay",
-  "version": "12.0.0",
+  "version": "12.1.0",
   "description": "An open source games site hosting 500+ games",
   "main": "index.html",
   "dependencies": {
@@ -9,9 +9,7 @@
     "firebase": "^10.6.0"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start": "echo 'This is a static site, no build step required'"
   },
   "author": "Vex-Interactive",
   "license": "MIT"
