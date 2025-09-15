@@ -59,47 +59,6 @@
         }
         </script>
 
-        <!-- Premium content protection -->
-        <script src="/storage/js/auth.js"></script>
-        <script src="/storage/js/auth-fix.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Find line 490 and mark all game links after it as premium
-                const gameLinks = document.querySelectorAll('.button-container a');
-                let isPremiumSection = false;
-                let gameCount = 0;
-                
-                gameLinks.forEach(function(gameLink) {
-                    gameCount++;
-                    
-                    // Line 490 is approximately game #36 (considering HTML structure and spacing)
-                    // We're using game count as a more reliable indicator than actual line numbers
-                    if (gameCount > 36) {
-                        isPremiumSection = true;
-                    }
-                    
-                    // Handle specific previously premium games that should now be free
-                    const href = gameLink.getAttribute('href');
-                    const premiumExceptions = [
-                        'fnaf-2', 'fnaf-3', 'fnaf-4', 'riddleschool', 'driftboss', 
-                        'fnf', 'pacman', 'papaspancakeria', 'rooftop', 'baldisbasics',
-                        'bobtherobber2', 'minesweeper', 'pokemonemerald', 'pokemonfirered',
-                        'supermariobros', 'supermariokart', 'supermarioworld', 'thereisnogame',
-                        'worldshardestgame', 'castlevania', 'donkeykong', 'drmario',
-                        'metroid', 'supermariobros2', 'tinyfishing', 'tetris'
-                    ];
-                    
-                    // Don't mark any games as premium content since all games are unlocked for guests
-                    // We've removed the premium-content class application for games
-                });
-                
-                // Skip applying premium content restrictions for games
-                // Games should all be accessible now
-                
-                // We don't need to create lock icons for games anymore
-                // createLockIcon() function call removed
-            });
-        </script>
   </head>
   <body>
     
